@@ -2,7 +2,7 @@ name: Deploy to bin4xin.github.io
 
 on:
   push:
-    branches: [ main, master ]  # 同时监听 main 和 master
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -24,31 +24,28 @@ jobs:
       - name: Build static site
         run: npm run build
 
-      # 重组输出目录：将 out 下所有内容移动到 out/sentinel-sec-lab
-      - name: Restructure output for basePath
-        run: |
-          mkdir -p out/sentinel-sec-lab
-          find out -maxdepth 1 -not -name "sentinel-sec-lab" -not -name "out" -exec mv {} out/sentinel-sec-lab/ \;
-          ls -la out/sentinel-sec-lab/
-
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
           repository: Bin4xin/bin4xin.github.io
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: target-repo
-          ref: gh-pages   # 指定 gh-pages 分支
+          ref: gh-pages
 
       - name: Copy built files
         run: |
           ls -la out/
-          cp -r out/sentinel-sec-lab target-repo/
+          rm -rf target-repo/sentinel-sec-lab
+          mkdir -p target-repo/sentinel-sec-lab
+          cp -r out/* target-repo/sentinel-sec-lab/
+          ls -la out/
 
       - name: Commit and push
         run: |
           cd target-repo && ls -la
-          mv sentinel-sec-lab/_next/ .
-          mv sentinel-sec-lab/data/ .
+          cp sentinel-sec-lab/_next/ ./_next/
+          cp sentinel-sec-lab/data/ ./data/
+          ls -la
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .

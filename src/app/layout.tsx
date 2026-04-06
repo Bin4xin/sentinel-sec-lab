@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sentinel Sec - Lab Simulator",
   description: "Sentinel Sec 实验室模拟器 - 交互式安全场景演示平台",
+  metadataBase: new URL('https://bin4xin.github.io'),
   icons: {
     icon: "/assets/pics/favicon.png",
     apple: "/assets/pics/logo-small.png",
