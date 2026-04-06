@@ -1,4 +1,4 @@
-name: Deploy to bin4xin.github.io
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -24,30 +24,10 @@ jobs:
       - name: Build static site
         run: npm run build
 
-      - name: Checkout target repo
-        uses: actions/checkout@v4
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          repository: Bin4xin/bin4xin.github.io
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          path: target-repo
-          ref: gh-pages
-
-      - name: Copy built files
-        run: |
-          ls -la out/
-          rm -rf target-repo/sentinel-sec-lab
-          mkdir -p target-repo/sentinel-sec-lab
-          cp -r out/* target-repo/sentinel-sec-lab/
-          ls -la out/
-
-      - name: Commit and push
-        run: |
-          cd target-repo && ls -la
-          cp -r sentinel-sec-lab/_next/* ./_next/
-          cp -r sentinel-sec-lab/data/* ./data/
-          ls -la
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git diff --quiet && git diff --staged --quiet || git commit -m "Deploy sentinel-sec-lab - ${{ github.sha }}"
-          git push
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          force_orphan: true
