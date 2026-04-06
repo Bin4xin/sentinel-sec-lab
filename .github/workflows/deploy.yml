@@ -28,13 +28,8 @@ jobs:
       - name: Restructure output for basePath
         run: |
           mkdir -p out/sentinel-sec-lab
-          mkdir -p out/sentinel-sec-lab/assets/pics
-          cp out/assets/pics/logo-small.svg out/sentinel-sec-lab/assets/pics/logo-small.svg
-          cp out/assets/pics/favicon.png out/sentinel-sec-lab/assets/pics/favicon.png
-          mv out/_next out/sentinel-sec-lab/ || true
-          mv out/*.html out/sentinel-sec-lab/ || true
-          mv out/404 out/sentinel-sec-lab/ || true
-          mv out/*.txt out/sentinel-sec-lab/ || true
+          find out -maxdepth 1 -not -name "sentinel-sec-lab" -not -name "out" -exec mv {} out/sentinel-sec-lab/ \;
+          ls -la out/sentinel-sec-lab/
 
       - name: Checkout target repo
         uses: actions/checkout@v4
@@ -47,15 +42,12 @@ jobs:
       - name: Copy built files
         run: |
           ls -la out/
-          # 复制 sentinel-sec-lab 子目录（包含 _next 和 HTML）
           cp -r out/sentinel-sec-lab target-repo/
-          # 复制 assets 和 data 到目标仓库根目录（与 sentinel-sec-lab 同级）
-          cp -r out/assets target-repo/ 2>/dev/null || true
-          cp -r out/data target-repo/ 2>/dev/null || true
 
       - name: Commit and push
         run: |
-          cd target-repo
+          cd target-repo && ls -la
+          rm -rf data
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .

@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "/sentinel-sec-lab",
-  assetPrefix: "/sentinel-sec-lab",
+  basePath: "",
+  assetPrefix: "/",
   images: {
     unoptimized: true,
   },
