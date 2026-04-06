@@ -35,16 +35,6 @@ jobs:
           mv out/*.html out/sentinel-sec-lab/ || true
           mv out/404 out/sentinel-sec-lab/ || true
           mv out/*.txt out/sentinel-sec-lab/ || true
-#          mkdir -p out/sentinel-sec-lab
-#          # 移动 _next 目录
-#          mv out/_next out/sentinel-sec-lab/ || true
-#          # 移动所有 .html 文件
-#          mv out/*.html out/sentinel-sec-lab/ || true
-#          # 移动 404 目录（如果存在）
-#          mv out/404 out/sentinel-sec-lab/ || true
-#          # 移动 index.txt 等根目录下的文本文件（根据你的输出调整）
-#          mv out/*.txt out/sentinel-sec-lab/ || true
-#          # 注意：不要移动 assets 和 data 目录
 
       - name: Checkout target repo
         uses: actions/checkout@v4
@@ -56,8 +46,12 @@ jobs:
 
       - name: Copy built files
         run: |
-          rm -rf target-repo/sentinel-sec-lab
+          ll out/
+          # 复制 sentinel-sec-lab 子目录（包含 _next 和 HTML）
           cp -r out/sentinel-sec-lab target-repo/
+          # 复制 assets 和 data 到目标仓库根目录（与 sentinel-sec-lab 同级）
+          cp -r out/assets target-repo/ 2>/dev/null || true
+          cp -r out/data target-repo/ 2>/dev/null || true
 
       - name: Commit and push
         run: |
