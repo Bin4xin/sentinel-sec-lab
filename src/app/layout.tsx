@@ -18,18 +18,18 @@ export const metadata: Metadata = {
   description: "Sentinel Sec 实验室模拟器 - 交互式安全场景演示平台",
   metadataBase: new URL('https://bin4xin.github.io'),
   icons: {
-    icon: "/assets/pics/favicon.png",
-    apple: "/assets/pics/logo-small.png",
+    icon: "/assets/img/favicon.png",
+    apple: "/assets/img/logo-small.png",
   },
   openGraph: {
     title: "Sentinel Sec - Lab Simulator",
     description: "交互式安全场景模拟器",
-    images: ["/assets/pics/logo-share.png"],
+    images: ["/assets/img/logo-share.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sentinel Sec - Lab Simulator",
-    images: ["/assets/pics/logo-share.png"],
+    images: ["/assets/img/logo-share.png"],
   },
 };
 
