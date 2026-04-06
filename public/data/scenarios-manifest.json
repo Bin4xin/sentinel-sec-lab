@@ -3,7 +3,7 @@
     {
       "id": "ai-cli",
       "name": "Ai Cli",
-      "description": "",
+      "description": "Category: ai-cli",
       "files": [
         "ch01.json",
         "ch02.json"
@@ -12,7 +12,7 @@
     {
       "id": "apache-log4j2",
       "name": "Apache Log4j2",
-      "description": "",
+      "description": "Category: apache-log4j2",
       "files": [
         "ch01.json",
         "ch02.json"
@@ -29,7 +29,7 @@
     {
       "id": "binfiles",
       "name": "Binfiles",
-      "description": "",
+      "description": "Category: binfiles",
       "files": [
         "ch01.json",
         "ch02.json"
@@ -38,7 +38,7 @@
     {
       "id": "burp",
       "name": "Burp",
-      "description": "",
+      "description": "Category: burp",
       "files": [
         "ch01.json"
       ]
@@ -66,7 +66,7 @@
     {
       "id": "cobalt-strike",
       "name": "Cobalt Strike",
-      "description": "",
+      "description": "Category: cobalt-strike",
       "files": [
         "ch01.json",
         "ch02.json",
@@ -111,7 +111,7 @@
     {
       "id": "deser-walkthrough",
       "name": "Deser Walkthrough",
-      "description": "",
+      "description": "Category: deser-walkthrough",
       "files": [
         "ch01.json",
         "ch02.json",
@@ -123,7 +123,7 @@
     {
       "id": "gitlab",
       "name": "Gitlab",
-      "description": "",
+      "description": "Category: gitlab",
       "files": [
         "ch01.json",
         "ch02.json",
@@ -141,7 +141,7 @@
     {
       "id": "openlitespeed",
       "name": "Openlitespeed",
-      "description": "",
+      "description": "Category: openlitespeed",
       "files": [
         "ch01.json"
       ]
@@ -158,7 +158,7 @@
     {
       "id": "spring-boot",
       "name": "Spring Boot",
-      "description": "",
+      "description": "Category: spring-boot",
       "files": [
         "ch01.json"
       ]
@@ -166,7 +166,7 @@
     {
       "id": "spring-cloud",
       "name": "Spring Cloud",
-      "description": "",
+      "description": "Category: spring-cloud",
       "files": [
         "ch01.json"
       ]
@@ -174,7 +174,7 @@
     {
       "id": "sql-injection",
       "name": "Sql Injection",
-      "description": "",
+      "description": "Category: sql-injection",
       "files": [
         "ch01.json"
       ]
@@ -182,7 +182,7 @@
     {
       "id": "todo-oa",
       "name": "Todo Oa",
-      "description": "",
+      "description": "Category: todo-oa",
       "files": [
         "ch01.json"
       ]
@@ -190,7 +190,7 @@
     {
       "id": "tools",
       "name": "Tools",
-      "description": "",
+      "description": "Category: tools",
       "files": [
         "ch01.json"
       ]
@@ -198,7 +198,7 @@
     {
       "id": "waf",
       "name": "Waf",
-      "description": "",
+      "description": "Category: waf",
       "files": [
         "ch01.json",
         "ch02.json"
