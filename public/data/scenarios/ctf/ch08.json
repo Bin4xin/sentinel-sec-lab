@@ -1,0 +1,163 @@
+{
+    "_source_md":  "CTF/2025-02-18-Pattern-Password-in-Marshmallow.md",
+    "version":  "pattern-password-marshmallow",
+    "title":  {
+                  "zh":  "Android棉花糖版本图案密码破解",
+                  "en":  "Cracking Android Pattern Password in Marshmallow"
+              },
+    "description":  {
+                        "zh":  "Android 6.0-8.0版本图案密码破解详解，通过分析gatekeeper.pattern.key文件使用scrypt算法暴力破解。",
+                        "en":  "Detailed explanation of Android 6.0-8.0 pattern password cracking, analyzing gatekeeper.pattern.key file using scrypt algorithm brute force."
+                    },
+    "steps":  [
+                  {
+                      "type":  "user_message",
+                      "content":  {
+                                      "zh":  "分析Android棉花糖及以下版本的图案密码破解方法",
+                                      "en":  "Analyze Android Marshmallow and below pattern password cracking methods"
+                                  },
+                      "annotation":  {
+                                         "zh":  "用户请求Android密码破解分析",
+                                         "en":  "User requests Android password cracking analysis"
+                                     },
+                      "codeBlocks":  [
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "\u003c?xml version=\u00271.0\u0027 encoding=\u0027utf-8\u0027 standalone=\u0027yes\u0027 ?\u003e\n\u003cpolicies setup-complete=\"true\"\u003e\n\u003cadmin name=\"com.google.android.gms/com.google.android.gms.mdm.receivers.MdmDeviceAdminReceiver\"\u003e\n\u003cpolicies flags=\"540\" /\u003e\n\u003cdisable-bt-contacts-sharing value=\"true\" /\u003e\n\u003c/admin\u003e\n\u003cactive-password quality=\"65536\" length=\"7\" uppercase=\"0\" lowercase=\"0\" letters=\"0\" numeric=\"0\" symbols=\"0\" nonletter=\"0\" /\u003e\n\u003c/policies\u003e",
+                                             "language":  "xml"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "# 鐢熸垚鎵€鏈変笉閲嶅鐨?浣嶅瘑鐮佺粍鍚?with open(\u0027password.txt\u0027, \u0027a\u0027) as file1:\n    for perm in itertools.permutations(\"123456789\", 7):\n    # 鐢熸垚鎵€鏈?浣嶄笉閲嶅鐨勬帓鍒?        password = \u0027\u0027.join(perm)\n        # 缁勫悎鎴愬瓧绗︿覆\n        file1.write(password + \u0027\\n\u0027)\n        # 鍐欏叆鏂囦欢",
+                                             "language":  "python"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "# Scrypt Lib渚濊禆鍙傛暟\nN = 16384  # CPU/鍐呭瓨娑堣€楀弬鏁帮紝鎺у埗璁＄畻澶嶆潅搴?r = 8      # 鍧楀ぇ灏忓弬鏁帮紝鎺у埗鍐呭瓨浣跨敤\np = 1      # 骞惰鍖栧弬鏁帮紝鎺у埗骞惰璁＄畻鐨勬暟閲?\n# 璇诲彇 gatekeeper.pattern.key 鏂囦欢\nwith open(\u0027gatekeeper.pattern.key\u0027, \u0027rb\u0027) as f:  # 浠ヤ簩杩涘埗妯″紡鎵撳紑鏂囦欢\n    blob = f.read()  # 璇诲彇鏂囦欢鍐呭鍒板彉閲?blob\n\n# 鎻愬彇鍏抽敭淇℃伅\ns = struct.Struct(\u0027\u003c\u0027 + \u002717s 8s 32s\u0027)  # 瀹氫箟浜岃繘鍒舵暟鎹殑瑙ｆ瀽鏍煎紡锛?7瀛楄妭瀛楃涓?+ 8瀛楄妭瀛楃涓?+ 32瀛楄妭瀛楃涓?(meta, salt, signature) = s.unpack_from(blob)  # 浠?blob 涓В鏋愬嚭 meta銆乻alt 鍜?signature\n\n# 璇诲彇瀛楀吀鏂囦欢\nwith open(\u0027password.txt\u0027, \u0027r\u0027) as f1:  # 浠ュ彧璇绘ā寮忔墦寮€瀛楀吀鏂囦欢\n    lines = f1.readlines()  # 璇诲彇鎵€鏈夎鍒板垪琛?lines\n\n# 閬嶅巻瀛楀吀灏濊瘯鐮磋В\nfor data in lines:\n    password = data.strip()  # 鍘婚櫎姣忚棣栧熬鐨勭┖鐧藉瓧绗︼紙濡傛崲琛岀锛?    \n    # 纭繚瀵嗙爜涓轰簩杩涘埗鏍煎紡\n    password_bytes = password.encode(\u0027utf-8\u0027)  # 灏嗗瘑鐮佸瓧绗︿覆缂栫爜涓?UTF-8 鏍煎紡鐨勫瓧鑺?    to_hash = meta + password_bytes  # 缁勫悎 meta 鍜屽瘑鐮佸瓧鑺傦紝褰㈡垚寰呭搱甯岀殑鏁版嵁\n    \n    # 璁＄畻 Scrypt Hash\n    hash_result = scrypt.hash(to_hash, salt, N, r, p)  # 浣跨敤 Scrypt 绠楁硶璁＄畻鍝堝笇鍊?\n    # 鎵撳嵃璋冭瘯淇℃伅\n    print \u0027Passed: %s\u0027 % password  # 鎵撳嵃褰撳墠灏濊瘯鐨勫瘑鐮?    print \u0027signature: %s\u0027 % signature.encode(\u0027hex\u0027)  # 鎵撳嵃绛惧悕锛堝崄鍏繘鍒舵牸寮忥級\n    print \u0027Hash:      %s\u0027 % hash_result[0:32].encode(\u0027hex\u0027)  # 鎵撳嵃鍝堝笇鍊肩殑鍓?32 浣嶏紙鍗佸叚杩涘埗鏍煎紡锛?    print \u0027Equal:     %s\u0027 % (hash_result[0:32] == signature)  # 姣旇緝鍝堝笇鍊肩殑鍓?32 浣嶄笌绛惧悕鏄惁鐩哥瓑\n\n    if hash_result[0:32] == signature:  # 濡傛灉鍖归厤锛屾墦鍗版垚鍔熷瘑鐮佸苟缁堟绋嬪簭\n        print \"Matched: %s\" % password  # 鎵撳嵃鎵惧埌鐨勫瘑鐮?        print \"SUccess\"  # 鎵撳嵃鎴愬姛淇℃伅\n        exit(0)  # 閫€鍑虹▼搴?\n# 濡傛灉閬嶅巻瀹屾墍鏈夊瘑鐮佷粛鏈壘鍒板尮閰嶉」\nprint \"Unmatched...\"  # 鎵撳嵃鏈壘鍒板尮閰嶅瘑鐮佺殑淇℃伅",
+                                             "language":  "python"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "$ python2 crack.py\nPassed: 1256987\nsignature: ef68fd098aad3083794dbebaf9190bf1d981956d8a3301aece73cdfb4ed3bd6e\nHash:      ef68fd098aad3083794dbebaf9190bf1d981956d8a3301aece73cdfb4ed3bd6e\nEqual:     True\nMatched: 1256987\nSuccess!",
+                                             "language":  "bash"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "#!/usr/bin/python\n# -*- coding:utf-8 -*-\n\nimport itertools\nimport struct\nimport binascii\nimport scrypt\n\ndef Rock():\n    N = 16384\n    r = 8\n    p = 1\n    with open(\u0027gatekeeper.pattern.key\u0027, \u0027rb\u0027) as f:\n        blob = f.read()\n    s = struct.Struct(\u0027\u003c\u0027 + \u002717s 8s 32s\u0027)\n    (meta, salt, signature) = s.unpack_from(blob)\n\n    with open(\u0027password.txt\u0027, \u0027r\u0027) as f1:\n        lines = f1.readlines()\n\n    for data in lines:\n        password = data.strip()\n        password_bytes = password.encode(\u0027utf-8\u0027)  \n        to_hash = meta + password_bytes\n        hash_result = scrypt.hash(to_hash, salt, N, r, p)\n        print \u0027Passed: %s\u0027 % password\n        print \u0027signature: %s\u0027 % signature.encode(\u0027hex\u0027)\n        print \u0027Hash:      %s\u0027 % hash_result[0:32].encode(\u0027hex\u0027)\n        print \u0027Equal:     %s\u0027 % (hash_result[0:32] == signature)\n        if hash_result[0:32] == signature:\n            print \"Matched: %s\" % password\n            print \"Success!\"\n            exit(0)\n    print \"Unmatched...\"\n\ndef Passlist():\n    with open(\u0027password.txt\u0027, \u0027a\u0027) as file1:\n        for perm in itertools.permutations(\"123456789\", 7):\n            password = \u0027\u0027.join(perm)\n            file1.write(password + \u0027\\n\u0027)\n    Rock()\n\nif __name__ == \"__main__\":\n    Passlist()",
+                                             "language":  "python"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "ps\u003e python2 .\\crypt.py\nTraceback (most recent call last):\n  File \".\\crypt.py\", line 4, in \u003cmodule\u003e\n    import scrypt\n  File \"C:\\Python27\\lib\\site-packages\\scrypt.py\", line 11, in \u003cmodule\u003e\n    _scrypt = cdll.LoadLibrary(imp.find_module(\u0027_scrypt\u0027)[1])\n  File \"C:\\Python27\\lib\\ctypes\\__init__.py\", line 444, in LoadLibrary\n    return self._dlltype(name)\n  File \"C:\\Python27\\lib\\ctypes\\__init__.py\", line 366, in __init__\n    self._handle = _dlopen(self._name, mode)\nWindowsError: [Error 126]",
+                                             "language":  "powershell"
+                                         },
+                                         {
+                                             "caption":  {
+                                                             "zh":  "",
+                                                             "en":  ""
+                                                         },
+                                             "code":  "python2 -m pip install scrypt==0.8.11",
+                                             "language":  "bash"
+                                         }
+                                     ]
+                  },
+                  {
+                      "type":  "assistant_text",
+                      "content":  {
+                                      "zh":  "Android不同版本锁屏密码存储方式不同。早期版本使用SHA1，6.0+使用scrypt算法加密。",
+                                      "en":  "Different Android versions store lock screen passwords differently. Early versions use SHA1, 6.0+ uses scrypt algorithm encryption."
+                                  },
+                      "annotation":  {
+                                         "zh":  "助手介绍Android密码存储机制",
+                                         "en":  "Assistant introduces Android password storage mechanism"
+                                     }
+                  },
+                  {
+                      "type":  "tool_result",
+                      "toolName":  "adb",
+                      "content":  {
+                                      "zh":  "获取关键文件：gatekeeper.pattern.key包含meta、salt、signature三部分",
+                                      "en":  "Obtain key files: gatekeeper.pattern.key contains meta, salt, signature three parts"
+                                  },
+                      "annotation":  {
+                                         "zh":  "获取密钥文件",
+                                         "en":  "Obtain key file"
+                                     }
+                  },
+                  {
+                      "type":  "assistant_text",
+                      "content":  {
+                                      "zh":  "gatekeeper.pattern.key文件结构：17字节meta + 8字节salt + 32字节signature。需要暴力破解匹配signature。",
+                                      "en":  "gatekeeper.pattern.key file structure: 17 bytes meta + 8 bytes salt + 32 bytes signature. Need brute force to match signature."
+                                  },
+                      "annotation":  {
+                                         "zh":  "助手分析文件结构",
+                                         "en":  "Assistant analyzes file structure"
+                                     }
+                  },
+                  {
+                      "type":  "tool_result",
+                      "toolName":  "cat",
+                      "content":  {
+                                      "zh":  "从device_policies.xml获取密码长度=length=\"7\"",
+                                      "en":  "Obtain password length from device_policies.xml: length=\"7\""
+                                  },
+                      "annotation":  {
+                                         "zh":  "获取密码长度信息",
+                                         "en":  "Obtain password length info"
+                                     }
+                  },
+                  {
+                      "type":  "assistant_text",
+                      "content":  {
+                                      "zh":  "知道密码长度为7位，使用1-9数字不重复排列生成字典。9选7排列共9!/(9-7)!=181440种可能。",
+                                      "en":  "Knowing password length is 7 digits, generate dictionary using 1-9 non-repeating permutations. 9 choose 7 gives 181440 possibilities."
+                                  },
+                      "annotation":  {
+                                         "zh":  "助手计算破解复杂度",
+                                         "en":  "Assistant calculates cracking complexity"
+                                     }
+                  },
+                  {
+                      "type":  "tool_result",
+                      "toolName":  "python",
+                      "content":  {
+                                      "zh":  "使用scrypt库计算每个候选密码的哈希，与signature比对找到匹配：1256987",
+                                      "en":  "Use scrypt library to calculate hash for each candidate password, compare with signature to find match: 1256987"
+                                  },
+                      "annotation":  {
+                                         "zh":  "暴力破解成功",
+                                         "en":  "Brute force successful"
+                                     }
+                  },
+                  {
+                      "type":  "assistant_text",
+                      "content":  {
+                                      "zh":  "成功破解图案密码。关键步骤：获取密钥文件结构、确定密码长度、生成字典、scrypt比对。Android取证必备技能。",
+                                      "en":  "Successfully cracked pattern password. Key steps: obtain key file structure, determine password length, generate dictionary, scrypt comparison. Essential Android forensics skill."
+                                  },
+                      "annotation":  {
+                                         "zh":  "助手总结破解方法",
+                                         "en":  "Assistant summarizes cracking method"
+                                     }
+                  }
+              ]
+}

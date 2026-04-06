@@ -1,0 +1,29 @@
+{
+  "name": "sentinel-sec-lab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run generate:manifest && next dev --port 3201",
+    "build": "npm run generate:manifest && next build",
+    "start": "next start",
+    "generate:manifest": "node scripts/generate-manifest.mjs"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.460.0",
+    "next": "15.3.8",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-syntax-highlighter": "^15.6.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
