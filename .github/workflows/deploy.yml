@@ -43,8 +43,8 @@ jobs:
       - name: Commit and push
         run: |
           cd target-repo && ls -la
-          cp sentinel-sec-lab/_next/ ./_next/
-          cp sentinel-sec-lab/data/ ./data/
+          cp -r sentinel-sec-lab/_next/* ./_next/
+          cp -r sentinel-sec-lab/data/* ./data/
           ls -la
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
