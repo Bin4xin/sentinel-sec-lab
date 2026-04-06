@@ -27,6 +27,14 @@ jobs:
       # 重组输出目录：将 out 下所有内容移动到 out/sentinel-sec-lab
       - name: Restructure output for basePath
         run: |
+          mkdir -p out/sentinel-sec-lab
+          mkdir -p out/sentinel-sec-lab/assets/pics
+          cp out/assets/pics/logo-small.svg out/sentinel-sec-lab/assets/pics/logo-small.svg
+          cp out/assets/pics/favicon.png out/sentinel-sec-lab/assets/pics/favicon.png
+          mv out/_next out/sentinel-sec-lab/ || true
+          mv out/*.html out/sentinel-sec-lab/ || true
+          mv out/404 out/sentinel-sec-lab/ || true
+          mv out/*.txt out/sentinel-sec-lab/ || true
 #          mkdir -p out/sentinel-sec-lab
 #          # 移动 _next 目录
 #          mv out/_next out/sentinel-sec-lab/ || true
@@ -37,14 +45,6 @@ jobs:
 #          # 移动 index.txt 等根目录下的文本文件（根据你的输出调整）
 #          mv out/*.txt out/sentinel-sec-lab/ || true
 #          # 注意：不要移动 assets 和 data 目录
-          mkdir -p out/sentinel-sec-lab
-          mkdir -p out/sentinel-sec-lab/assets/pics
-          cp out/assets/pics/logo-small.svg out/sentinel-sec-lab/assets/pics/logo-small.svg
-          cp out/assets/pics/favicon.png out/sentinel-sec-lab/assets/pics/favicon.png
-          mv out/_next out/sentinel-sec-lab/ || true
-          mv out/*.html out/sentinel-sec-lab/ || true
-          mv out/404 out/sentinel-sec-lab/ || true
-          mv out/*.txt out/sentinel-sec-lab/ || true
 
       - name: Checkout target repo
         uses: actions/checkout@v4
