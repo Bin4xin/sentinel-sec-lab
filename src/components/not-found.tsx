@@ -22,8 +22,8 @@ export function NotFound() {
   }
 
   const imgSrc = theme === "dark" 
-    ? "/assets/pics/missing.png" 
-    : "/assets/pics/missing-dark.png";
+    ? "/assets/img/missing.png"
+    : "/assets/img/missing-dark.png";
 
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center">

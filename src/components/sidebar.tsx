@@ -34,8 +34,8 @@ export function Sidebar({
 
   // 直接用 theme 变量选择图片，不依赖 CSS dark: class
   const logoSrc = theme === "dark" 
-    ? "/assets/pics/logo-small-dark.png" 
-    : "/assets/pics/logo-small.svg";
+    ? "/img/pics/logo-small-dark.png"
+    : "/img/pics/logo-small.svg";
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[var(--card-border)] bg-[var(--card-bg)]">
