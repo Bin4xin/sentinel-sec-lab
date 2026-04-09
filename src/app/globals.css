@@ -11,13 +11,11 @@
   --card-border: #e5e5e5;
   --text-muted: #737373;
   --primary: #171717;
-  
   /* Sidebar colors - WCAG AA compliant */
   --sidebar-bg: #f8f9fa;
   --sidebar-text: #1e293b;
   --sidebar-border: #e2e8f0;
   --sidebar-muted: #64748b;
-  
   /* Accent color for highlight scheme */
   --accent: #82318E;
   --accent-light: #a855c4;
@@ -30,13 +28,12 @@
   --card-border: #262626;
   --text-muted: #a3a3a3;
   --primary: #ededed;
-  
   /* Sidebar colors - WCAG AA compliant */
   --sidebar-bg: #1e1e2e;
   --sidebar-text: #e2e8f0;
   --sidebar-border: #334155;
   --sidebar-muted: #94a3b8;
-  
+
   /* Accent color for dark highlight scheme */
   --accent: #b77dbf;
   --accent-light: #d4a5e0;

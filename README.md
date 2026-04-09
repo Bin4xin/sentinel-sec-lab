@@ -1,6 +1,12 @@
 # Sentinel Sec Lab - 安全研究场景模拟器
 
+[English](./README-en.md) | **中文**
+
 交互式安全研究场景演示平台，基于 Next.js 15 + Tailwind CSS 4 + Framer Motion 构建。
+
+## 参考框架
+
+本项目基于 [Deep-Dive-Claude-Code](https://github.com/waiterxiaoyy/Deep-Dive-Claude-Code) 扩展开发。
 
 ## 在线访问
 

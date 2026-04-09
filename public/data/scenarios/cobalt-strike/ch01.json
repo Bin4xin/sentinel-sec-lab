@@ -87,10 +87,10 @@
                                          },
                                          {
                                              "caption":  {
-                                                             "zh":  "",
+                                                             "zh":  "重签自有证书",
                                                              "en":  ""
                                                          },
-                                             "code":  "#鐢熸垚p12鏂囦欢\nopenssl pkcs12 -export -in public.pem -inkey private.key -out domain-test.p12 -name domain-test.com -passout pass:123456\n#鐢熸垚store鏂囦欢\nkeytool -importkeystore -deststorepass 123456 -destkeypass 123456 -destkeystore domain-test.store -srckeystore domain-test.p12 -srcstoretype PKCS12 -srcstorepass 123456 -alias domain-test.com\n#鐢熸垚鐨勬枃浠跺悕瀛楀彲浠ラ殢鎰忥紝鍩熷悕闇€瀵瑰簲涓婏紱",
+                                             "code":  "#生成p12文件\nopenssl pkcs12 -export -in public.pem -inkey private.key -out domain-test.p12 -name domain-test.com -passout pass:123456\n#生成store文件\nkeytool -importkeystore -deststorepass 123456 -destkeypass 123456 -destkeystore domain-test.store -srckeystore domain-test.p12 -srcstoretype PKCS12 -srcstorepass 123456 -alias domain-test.com\n#生成的文件名字可以随意，域名需对应上；",
                                              "language":  "bash"
                                          }
                                      ]
@@ -103,7 +103,7 @@
                                   },
                       "annotation":  {
                                          "zh":  "助手响应",
-                                         "en":  "助手响应"
+                                         "en":  "Assistant Response"
                                      }
                   },
                   {
@@ -114,7 +114,7 @@
                                   },
                       "annotation":  {
                                          "zh":  "用户执行操作",
-                                         "en":  "用户执行操作"
+                                         "en":  "User performs action"
                                      }
                   },
                   {
@@ -125,7 +125,7 @@
                                   },
                       "annotation":  {
                                          "zh":  "助手响应",
-                                         "en":  "助手响应"
+                                         "en":  "Assistant Response"
                                      }
                   },
                   {
@@ -136,7 +136,7 @@
                                   },
                       "annotation":  {
                                          "zh":  "用户执行操作",
-                                         "en":  "用户执行操作"
+                                         "en":  "User performs action"
                                      }
                   },
                   {
@@ -147,7 +147,7 @@
                                   },
                       "annotation":  {
                                          "zh":  "助手响应",
-                                         "en":  "助手响应"
+                                         "en":  "Assistant Response"
                                      }
                   }
               ]

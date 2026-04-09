@@ -48,7 +48,19 @@
       "name": "Claude Code Dive",
       "description": "Category: claude-code-dive",
       "files": [
-        "ch01.json"
+        "ch01.json",
+        "ch02.json",
+        "ch03.json",
+        "ch04.json",
+        "ch05.json",
+        "ch06.json",
+        "ch07.json",
+        "ch08.json",
+        "ch09.json",
+        "ch10.json",
+        "ch11.json",
+        "ch12.json",
+        "ch13.json"
       ]
     },
     {

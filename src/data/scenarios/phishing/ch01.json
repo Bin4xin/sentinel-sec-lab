@@ -29,7 +29,7 @@
       },
       "annotation": {
         "zh": "助手响应",
-        "en": "助手响应"
+        "en": "Assistant Response"
       }
     },
     {
@@ -40,7 +40,7 @@
       },
       "annotation": {
         "zh": "用户执行操作",
-        "en": "用户执行操作"
+        "en":  "User performs action"
       }
     },
     {
@@ -51,7 +51,7 @@
       },
       "annotation": {
         "zh": "助手响应",
-        "en": "助手响应"
+        "en": "Assistant Response"
       }
     },
     {
@@ -62,7 +62,7 @@
       },
       "annotation": {
         "zh": "用户执行操作",
-        "en": "用户执行操作"
+        "en":  "User performs action"
       }
     },
     {
@@ -73,7 +73,7 @@
       },
       "annotation": {
         "zh": "助手响应",
-        "en": "助手响应"
+        "en": "Assistant Response"
       }
     }
   ]
