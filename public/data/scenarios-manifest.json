@@ -21,7 +21,7 @@
     {
       "id": "apereo-cas",
       "name": "Apereo Cas",
-      "description": "",
+      "description": "Category: apereo-cas",
       "files": [
         "ch01.json"
       ]
@@ -48,19 +48,7 @@
       "name": "Claude Code Dive",
       "description": "Category: claude-code-dive",
       "files": [
-        "ch01.json",
-        "ch02.json",
-        "ch03.json",
-        "ch04.json",
-        "ch05.json",
-        "ch06.json",
-        "ch07.json",
-        "ch08.json",
-        "ch09.json",
-        "ch10.json",
-        "ch11.json",
-        "ch12.json",
-        "ch13.json"
+        "ch01.json"
       ]
     },
     {
@@ -100,9 +88,9 @@
       ]
     },
     {
-      "id": "cve",
-      "name": "Cve",
-      "description": "Category: cve",
+      "id": "cve-Polkit",
+      "name": "Cve Polkit",
+      "description": "Category: cve-Polkit",
       "files": [
         "ch01.json",
         "ch02.json"
@@ -133,7 +121,7 @@
     {
       "id": "jmreport",
       "name": "Jmreport",
-      "description": "",
+      "description": "Category: jmreport",
       "files": [
         "ch01.json"
       ]
@@ -149,7 +137,7 @@
     {
       "id": "phishing",
       "name": "Phishing",
-      "description": "",
+      "description": "Category: phishing",
       "files": [
         "ch01.json",
         "ch02.json"

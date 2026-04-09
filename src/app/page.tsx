@@ -38,7 +38,8 @@ export default function Home() {
   useEffect(() => {
     if (!mounted) return;
 
-    fetch("/data/scenarios-manifest.json")
+    // 加载 manifest (带 basePath)
+    fetch("/sentinel-sec-lab/data/scenarios-manifest.json")
       .then((res) => res.json())
       .then((data: Manifest) => {
         const cats = data.categories || [];
@@ -70,7 +71,8 @@ export default function Home() {
     }
 
     setLoading(true);
-    fetch(`/data/scenarios/${selectedCategory}/${selectedScenario}.json`)
+    // 加载场景数据 (带 basePath)
+    fetch(`/sentinel-sec-lab/data/scenarios/${selectedCategory}/${selectedScenario}.json`)
       .then((res) => {
         if (!res.ok) throw new Error("Not found");
         return res.json();

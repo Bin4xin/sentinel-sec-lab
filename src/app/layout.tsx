@@ -41,9 +41,40 @@ export default function RootLayout({
   return (
     <html lang="zh" suppressHydrationWarning>
       <head>
+        {/* 
+          Inline script to prevent theme flash on page load.
+          This runs before React hydrates and applies the stored theme immediately.
+        */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();`,
+            __html: `
+              (function() {
+                // Get stored preferences
+                var themeMode = localStorage.getItem('theme-mode');
+                var colorScheme = localStorage.getItem('color-scheme');
+                var systemFollow = localStorage.getItem('system-follow') === 'true';
+                
+                // Determine theme mode
+                var isDark;
+                if (systemFollow) {
+                  isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                } else {
+                  isDark = themeMode === 'dark' || (!themeMode && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                }
+                
+                // Apply dark class
+                if (isDark) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+                
+                // Apply color scheme
+                if (colorScheme === 'highlight') {
+                  document.documentElement.setAttribute('data-color-scheme', 'highlight');
+                }
+              })();
+            `,
           }}
         />
       </head>

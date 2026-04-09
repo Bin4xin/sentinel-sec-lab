@@ -80,12 +80,10 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
   const config = TYPE_CONFIG[step.type] || TYPE_CONFIG.assistant_text;
   const Icon = config.icon;
 
-  // Detect dark mode
-  const isDark =
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("dark");
-
-  const highlightStyle = isDark ? vscDarkPlus : vs;
+  // Use CSS custom properties for theme-aware code highlighting
+  // The SyntaxHighlighter theme is set to vs (light) by default
+  // CSS overrides in globals.css handle dark mode colors
+  const highlightStyle = vs;
 
   return (
     <motion.div
@@ -155,12 +153,12 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                     fontSize: "0.75rem",
                     lineHeight: "1.5",
                     borderRadius: 0,
-                    background: isDark ? "#1e1e1e" : "#f8f8f8",
+                    background: "var(--code-bg)",
                   }}
                   lineNumberStyle={{
                     minWidth: "2.5em",
                     paddingRight: "1em",
-                    color: isDark ? "#555" : "#aaa",
+                    color: "var(--code-linenumber)",
                     userSelect: "none",
                   }}
                 >

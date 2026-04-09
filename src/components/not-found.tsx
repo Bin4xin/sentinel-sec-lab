@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/locale-context";
 
 export function NotFound() {
-  const { theme } = useTheme();
+  const { themeMode } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function NotFound() {
     );
   }
 
-  const imgSrc = theme === "dark" 
+  const imgSrc = themeMode === "dark" 
     ? "/assets/img/missing.png"
     : "/assets/img/missing-dark.png";
 

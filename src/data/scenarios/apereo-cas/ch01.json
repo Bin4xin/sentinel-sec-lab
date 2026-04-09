@@ -1,53 +1,25 @@
-﻿{
+{
   "_source_md": "Apereo-CAS/2022-06-06-Apereo-CAS-LessThan-4-2-x-RCE.md",
-  "version": "apereo-cas-deserialization-rce",
+  "version": "Apereo-CAS-LessThan-4-2-x-RCE",
   "title": {
     "zh": "Apereo CAS < 4.2.x 反序列化远程代码执行",
-    "en": "Apereo CAS < 4.2.x Deserialization RCE"
+    "en": "Apereo CAS < 4.2.x 反序列化远程代码执行"
   },
   "description": {
-    "zh": "Apereo CAS 4.2.x以下版本存在反序列化漏洞，通过execution参数可触发RCE。",
-    "en": "Apereo CAS versions below 4.2.x contain deserialization vulnerability. RCE via execution parameter."
+    "zh": "「Apereo CAS」",
+    "en": "「Apereo CAS」"
   },
   "steps": [
     {
-      "type": "user_message",
-      "content": { "zh": "分析Apereo CAS反序列化漏洞", "en": "Analyze Apereo CAS deserialization vulnerability" },
-      "annotation": { "zh": "用户询问", "en": "User asks" }
-    },
-    {
       "type": "assistant_text",
-      "content": { "zh": "CAS靶场搭建：从Maven仓库下载cas-server-webapp 4.1.6或4.2.7版本WAR包部署到Tomcat。", "en": "CAS lab setup: Download cas-server-webapp 4.1.6 or 4.2.7 WAR from Maven and deploy to Tomcat." },
-      "annotation": { "zh": "助手响应", "en": "Assistant response" }
-    },
-    {
-      "type": "system_event",
-      "content": { "zh": "资产发现 - 通过404路由查看版本：", "en": "Asset discovery - view version via 404 route:" },
-      "codeBlocks": [
-        {
-          "language": "http",
-          "code": "GET /cas/iwana404;) HTTP/1.1\nHost: cas.example.com\n\n# Response shows version in error page",
-          "caption": { "zh": "404页面显示CAS版本", "en": "404 page shows CAS version" }
-        }
-      ],
-      "annotation": { "zh": "系统事件", "en": "System event" }
-    },
-    {
-      "type": "user_message",
-      "content": { "zh": "反序列化入口在哪里？", "en": "Where is the deserialization entry point?" },
-      "annotation": { "zh": "用户询问", "en": "User asks" }
-    },
-    {
-      "type": "assistant_text",
-      "content": { "zh": "登录POST请求包中的execution参数是反序列化入口。攻击者可构造恶意序列化数据注入到execution参数触发RCE。", "en": "The execution parameter in login POST request is the deserialization entry point. Attackers can inject malicious serialized data to trigger RCE." },
-      "codeBlocks": [
-        {
-          "language": "http",
-          "code": "POST /login;jsessionid=SESSION_ID HTTP/1.1\nHost: localhost:8000\nContent-Type: application/x-www-form-urlencoded\n\nusername=admin&password=123&execution=MALICIOUS_SERIALIZED_DATA",
-          "caption": { "zh": "execution参数注入点", "en": "execution parameter injection point" }
-        }
-      ],
-      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+      "content": {
+        "zh": "### CAS靶场搭建\n\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\nCAS::Maven仓库地址</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.1.6\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.1.6</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.2.7\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.2.7</a>\n</div>\n---\n\n分别进入下载Pom或者War，不想麻烦直接下载WAR包放到tomcat web文件夹就行。\n\n### 如何发现CAS资产\n\n- `Apereo Central Authentication Service`版本\n\n通过路由404报错查看版本：`https://cas.example.com/cas/iwana404;)`\n\n- 在CAS访问404资源时跳转302，本地不管是否配置`HTTPS证书`都不会返回404页面，所以排除了HTTPS证书的可能性；\n\n- [Tomcat SSL Cert](https://www.jianshu.com/p/a55590f486a2){:target=\"_blank\"}\n\n![2022-06-06-16.14.28.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-16.14.28.png)\n\n或者页脚处本身也会体现版本：\n\n![2022-06-06-17.10.40.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-17.10.40.png)\n\n- 登录`Post`请求包个性参数\n\n```\nPOST http://localhost:8000/login;jsessionid=1653784B0F427BE086AD4EC81386726D HTTP/1.1\nHost: localhost:8000\n\nusername=admin&password=123&execution=\n```\n\n如上面所示的`execution`参数（也是反序列化的入口）",
+        "en": "### CAS靶场搭建\n\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\nCAS::Maven仓库地址</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.1.6\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.1.6</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.2.7\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.2.7</a>\n</div>\n---\n\n分别进入下载Pom或者War，不想麻烦直接下载WAR包放到tomcat web文件夹就行。\n\n### 如何发现CAS资产\n\n- `Apereo Central Authentication Service`版本\n\n通过路由404报错查看版本：`https://cas.example.com/cas/iwana404;)`\n\n- 在CAS访问404资源时跳转302，本地不管是否配置`HTTPS证书`都不会返回404页面，所以排除了HTTPS证书的可能性；\n\n- [Tomcat SSL Cert](https://www.jianshu.com/p/a55590f486a2){:target=\"_blank\"}\n\n![2022-06-06-16.14.28.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-16.14.28.png)\n\n或者页脚处本身也会体现版本：\n\n![2022-06-06-17.10.40.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-17.10.40.png)\n\n- 登录`Post`请求包个性参数\n\n```\nPOST http://localhost:8000/login;jsessionid=1653784B0F427BE086AD4EC81386726D HTTP/1.1\nHost: localhost:8000\n\nusername=admin&password=123&execution=\n```\n\n如上面所示的`execution`参数（也是反序列化的入口）"
+      },
+      "annotation": {
+        "zh": "文档内容",
+        "en": "Document content"
+      }
     }
   ]
 }

