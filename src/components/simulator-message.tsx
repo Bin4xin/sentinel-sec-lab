@@ -1,7 +1,7 @@
 "use client";
 
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { SimStep } from "@/types/agent-data";
 import { getLocalizedText } from "@/lib/i18n";
@@ -10,6 +10,7 @@ import { User, Bot, Terminal, ArrowRight, AlertCircle, Copy, Check } from "lucid
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown from "react-markdown";
+// 如果未安装 remark-gfm，请删除下一行导入及下方 remarkPlugins 配置
 import remarkGfm from "remark-gfm";
 
 interface SimulatorMessageProps {
@@ -77,7 +78,6 @@ function CopyButton({ code }: { code: string }) {
   );
 }
 
-// 根据 step 类型返回容器的额外样式类
 function getContainerClassName(type: string): string {
   switch (type) {
     case "tool_call":
@@ -103,11 +103,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          className={cn(
-              "rounded-lg border p-3",
-              config.bgClass,
-              config.borderClass
-          )}
+          className={cn("rounded-lg border p-3", config.bgClass, config.borderClass)}
       >
         {/* Header */}
         <div className="mb-1.5 flex items-center gap-2">
@@ -115,14 +111,12 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
           <span className="text-xs font-medium text-[var(--text-muted)]">
           {config.label}
             {step.toolName && (
-                <span className="ml-1.5 font-mono text-[var(--foreground)]">
-              {step.toolName}
-            </span>
+                <span className="ml-1.5 font-mono text-[var(--foreground)]">{step.toolName}</span>
             )}
         </span>
         </div>
 
-        {/* Text content with Markdown support (all types) */}
+        {/* Text content with Markdown support */}
         {step.content && (
             <div
                 className={cn(
@@ -131,6 +125,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                 )}
             >
               <ReactMarkdown
+                  // 如果未安装 remark-gfm，请删除下面这行
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => (
@@ -145,15 +140,23 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                             {children}
                           </code>
                       ) : (
-                          <code className={cn("font-mono text-sm", className)}>
-                            {children}
-                          </code>
+                          <code className={cn("font-mono text-sm", className)}>{children}</code>
                       );
                     },
                     pre: ({ children }) => {
-                      const codeElement = children as React.ReactElement;
-                      const language = codeElement.props.className?.replace("language-", "") || "text";
-                      const code = codeElement.props.children as string;
+                      // 类型安全：确保 children 是有效的 React 元素
+                      if (!React.isValidElement(children)) {
+                        return <pre>{children}</pre>;
+                      }
+
+                      const codeElement = children as React.ReactElement<{
+                        className?: string;
+                        children?: React.ReactNode;
+                      }>;
+
+                      const className = codeElement.props.className || "";
+                      const language = className.replace("language-", "") || "text";
+                      const code = codeElement.props.children?.toString() || "";
 
                       return (
                           <div className="group relative my-2 overflow-hidden rounded-md border border-[var(--card-border)]">
@@ -216,7 +219,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
             </div>
         )}
 
-        {/* Dedicated code blocks field (optional, kept for backward compatibility) */}
+        {/* Dedicated code blocks field */}
         {step.codeBlocks && step.codeBlocks.length > 0 && (
             <div className={cn("flex flex-col gap-2", step.content ? "mt-2" : "")}>
               {step.codeBlocks.map((block, idx) => (
@@ -262,7 +265,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
             </div>
         )}
 
-        {/* Annotation with Markdown support */}
+        {/* Annotation */}
         {step.annotation && (
             <div className="mt-2 text-xs italic text-[var(--text-muted)]">
               <ReactMarkdown
