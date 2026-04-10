@@ -9,6 +9,8 @@ import { useLocale } from "@/lib/locale-context";
 import { User, Bot, Terminal, ArrowRight, AlertCircle, Copy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface SimulatorMessageProps {
   step: SimStep;
@@ -16,8 +18,8 @@ interface SimulatorMessageProps {
 }
 
 const TYPE_CONFIG: Record<
-  string,
-  { icon: typeof User; label: string; bgClass: string; borderClass: string }
+    string,
+    { icon: typeof User; label: string; bgClass: string; borderClass: string }
 > = {
   user_message: {
     icon: User,
@@ -60,131 +62,223 @@ function CopyButton({ code }: { code: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback: do nothing
+      // fallback
     }
   };
 
   return (
-    <button
-      onClick={handleCopy}
-      className="absolute right-2 top-2 rounded p-1 text-[var(--text-muted)] opacity-0 transition-opacity hover:text-[var(--foreground)] group-hover:opacity-100"
-      title="Copy code"
-    >
-      {copied ? <Check size={13} /> : <Copy size={13} />}
-    </button>
+      <button
+          onClick={handleCopy}
+          className="absolute right-2 top-2 rounded p-1 text-[var(--text-muted)] opacity-0 transition-opacity hover:text-[var(--foreground)] group-hover:opacity-100"
+          title="Copy code"
+      >
+        {copied ? <Check size={13} /> : <Copy size={13} />}
+      </button>
   );
+}
+
+// 根据 step 类型返回容器的额外样式类
+function getContainerClassName(type: string): string {
+  switch (type) {
+    case "tool_call":
+    case "tool_result":
+      return "font-mono text-xs";
+    case "system_event":
+      return "text-purple-300";
+    default:
+      return "text-sm";
+  }
 }
 
 export function SimulatorMessage({ step }: SimulatorMessageProps) {
   const { locale } = useLocale();
   const config = TYPE_CONFIG[step.type] || TYPE_CONFIG.assistant_text;
   const Icon = config.icon;
-
-  // Use CSS custom properties for theme-aware code highlighting
-  // The SyntaxHighlighter theme is set to vs (light) by default
-  // CSS overrides in globals.css handle dark mode colors
   const highlightStyle = vs;
 
+  const contentText = step.content ? getLocalizedText(step.content, locale) : "";
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      className={cn(
-        "rounded-lg border p-3",
-        config.bgClass,
-        config.borderClass
-      )}
-    >
-      {/* Header */}
-      <div className="mb-1.5 flex items-center gap-2">
-        <Icon size={14} className="shrink-0 text-[var(--text-muted)]" />
-        <span className="text-xs font-medium text-[var(--text-muted)]">
+      <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className={cn(
+              "rounded-lg border p-3",
+              config.bgClass,
+              config.borderClass
+          )}
+      >
+        {/* Header */}
+        <div className="mb-1.5 flex items-center gap-2">
+          <Icon size={14} className="shrink-0 text-[var(--text-muted)]" />
+          <span className="text-xs font-medium text-[var(--text-muted)]">
           {config.label}
-          {step.toolName && (
-            <span className="ml-1.5 font-mono text-[var(--foreground)]">
+            {step.toolName && (
+                <span className="ml-1.5 font-mono text-[var(--foreground)]">
               {step.toolName}
             </span>
-          )}
+            )}
         </span>
-      </div>
+        </div>
 
-      {/* Plain text content */}
-      {step.content && (
-        <>
-          {step.type === "tool_call" || step.type === "tool_result" ? (
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-[var(--background)] p-2.5 font-mono text-xs leading-relaxed text-[var(--foreground)]">
-              {getLocalizedText(step.content, locale) || "(empty)"}
-            </pre>
-          ) : step.type === "system_event" ? (
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded bg-purple-500/10 p-2.5 font-mono text-xs leading-relaxed text-purple-300 dark:text-purple-200">
-              {getLocalizedText(step.content, locale)}
-            </pre>
-          ) : (
-            <p className="text-sm leading-relaxed text-[var(--foreground)]">
-              {getLocalizedText(step.content, locale)}
-            </p>
-          )}
-        </>
-      )}
+        {/* Text content with Markdown support (all types) */}
+        {step.content && (
+            <div
+                className={cn(
+                    "leading-relaxed text-[var(--foreground)]",
+                    getContainerClassName(step.type)
+                )}
+            >
+              <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => (
+                        <p style={{ whiteSpace: "pre-line" }} className="my-0">
+                          {children}
+                        </p>
+                    ),
+                    code: ({ children, className }) => {
+                      const isInline = !className?.includes("language-");
+                      return isInline ? (
+                          <code className="rounded bg-[var(--accent)] px-1 py-0.5 font-mono text-[0.85em]">
+                            {children}
+                          </code>
+                      ) : (
+                          <code className={cn("font-mono text-sm", className)}>
+                            {children}
+                          </code>
+                      );
+                    },
+                    pre: ({ children }) => {
+                      const codeElement = children as React.ReactElement;
+                      const language = codeElement.props.className?.replace("language-", "") || "text";
+                      const code = codeElement.props.children as string;
 
-      {/* Code blocks with syntax highlighting */}
-      {step.codeBlocks && step.codeBlocks.length > 0 && (
-        <div className={cn("flex flex-col gap-2", step.content ? "mt-2" : "")}>
-          {step.codeBlocks.map((block, idx) => (
-            <div key={idx} className="overflow-hidden rounded-md border border-[var(--card-border)]">
-              {/* Language badge */}
-              <div className="flex items-center justify-between bg-[var(--card-bg)] px-3 py-1">
+                      return (
+                          <div className="group relative my-2 overflow-hidden rounded-md border border-[var(--card-border)]">
+                            <div className="flex items-center justify-between bg-[var(--card-bg)] px-3 py-1">
+                      <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                        {language}
+                      </span>
+                            </div>
+                            <div className="relative max-h-72 overflow-y-auto">
+                              <CopyButton code={code} />
+                              <SyntaxHighlighter
+                                  language={language}
+                                  style={highlightStyle}
+                                  showLineNumbers
+                                  wrapLongLines={false}
+                                  customStyle={{
+                                    margin: 0,
+                                    fontSize: "0.75rem",
+                                    lineHeight: "1.5",
+                                    borderRadius: 0,
+                                    background: "var(--code-bg)",
+                                  }}
+                                  lineNumberStyle={{
+                                    minWidth: "2.5em",
+                                    paddingRight: "1em",
+                                    color: "var(--code-linenumber)",
+                                    userSelect: "none",
+                                  }}
+                              >
+                                {code}
+                              </SyntaxHighlighter>
+                            </div>
+                          </div>
+                      );
+                    },
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    a: ({ href, children }) => (
+                        <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline"
+                        >
+                          {children}
+                        </a>
+                    ),
+                    ul: ({ children }) => <ul className="list-disc pl-5 my-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-5 my-1">{children}</ol>,
+                    li: ({ children }) => <li className="my-0.5">{children}</li>,
+                    blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-[var(--card-border)] pl-3 my-2 italic">
+                          {children}
+                        </blockquote>
+                    ),
+                  }}
+              >
+                {contentText}
+              </ReactMarkdown>
+            </div>
+        )}
+
+        {/* Dedicated code blocks field (optional, kept for backward compatibility) */}
+        {step.codeBlocks && step.codeBlocks.length > 0 && (
+            <div className={cn("flex flex-col gap-2", step.content ? "mt-2" : "")}>
+              {step.codeBlocks.map((block, idx) => (
+                  <div key={idx} className="overflow-hidden rounded-md border border-[var(--card-border)]">
+                    <div className="flex items-center justify-between bg-[var(--card-bg)] px-3 py-1">
                 <span className="font-mono text-[10px] text-[var(--text-muted)]">
                   {block.language}
                 </span>
-              </div>
-
-              {/* Code with copy button */}
-              <div className="group relative max-h-72 overflow-y-auto">
-                <CopyButton code={block.code} />
-                <SyntaxHighlighter
-                  language={block.language}
-                  style={highlightStyle}
-                  showLineNumbers
-                  wrapLongLines={false}
-                  customStyle={{
-                    margin: 0,
-                    fontSize: "0.75rem",
-                    lineHeight: "1.5",
-                    borderRadius: 0,
-                    background: "var(--code-bg)",
-                  }}
-                  lineNumberStyle={{
-                    minWidth: "2.5em",
-                    paddingRight: "1em",
-                    color: "var(--code-linenumber)",
-                    userSelect: "none",
-                  }}
-                >
-                  {block.code}
-                </SyntaxHighlighter>
-              </div>
-
-              {/* Caption */}
-              {block.caption && (
-                <div className="border-t border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-1.5">
-                  <p className="text-[11px] italic text-[var(--text-muted)]">
-                    {getLocalizedText(block.caption, locale)}
-                  </p>
-                </div>
-              )}
+                    </div>
+                    <div className="group relative max-h-72 overflow-y-auto">
+                      <CopyButton code={block.code} />
+                      <SyntaxHighlighter
+                          language={block.language}
+                          style={highlightStyle}
+                          showLineNumbers
+                          wrapLongLines={false}
+                          customStyle={{
+                            margin: 0,
+                            fontSize: "0.75rem",
+                            lineHeight: "1.5",
+                            borderRadius: 0,
+                            background: "var(--code-bg)",
+                          }}
+                          lineNumberStyle={{
+                            minWidth: "2.5em",
+                            paddingRight: "1em",
+                            color: "var(--code-linenumber)",
+                            userSelect: "none",
+                          }}
+                      >
+                        {block.code}
+                      </SyntaxHighlighter>
+                    </div>
+                    {block.caption && (
+                        <div className="border-t border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-1.5">
+                          <p className="text-[11px] italic text-[var(--text-muted)]">
+                            {getLocalizedText(block.caption, locale)}
+                          </p>
+                        </div>
+                    )}
+                  </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+        )}
 
-      {/* Annotation */}
-      {step.annotation && (
-        <p className="mt-2 text-xs italic text-[var(--text-muted)]">
-          {getLocalizedText(step.annotation, locale)}
-        </p>
-      )}
-    </motion.div>
+        {/* Annotation with Markdown support */}
+        {step.annotation && (
+            <div className="mt-2 text-xs italic text-[var(--text-muted)]">
+              <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p style={{ whiteSpace: "pre-line" }}>{children}</p>,
+                    code: ({ children }) => (
+                        <code className="rounded bg-[var(--code-bg)] px-1 py-0.5 font-mono text-[0.85em]">
+                          {children}
+                        </code>
+                    ),
+                  }}
+              >
+                {getLocalizedText(step.annotation, locale)}
+              </ReactMarkdown>
+            </div>
+        )}
+      </motion.div>
   );
 }
