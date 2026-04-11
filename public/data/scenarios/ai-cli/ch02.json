@@ -73,6 +73,11 @@
         "zh": "助手总结漏洞原理",
         "en": "Assistant summarizes vulnerability principle"
       }
+    },
+    {
+      "type": "tool_result",
+      "content": "![2026-03-26-12.31.51.png](https://image.isisy.com/images/2026/03/26/2026-03-26-12.31.51.png)",
+      "toolName": "CLI-LocalCommandExecute Pictures"
     }
   ]
 }
