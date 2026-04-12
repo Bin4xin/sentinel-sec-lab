@@ -69,7 +69,7 @@ export function SimulatorControls({
       </div>
 
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-[var(--text-muted)]">速度:</span>
+        {/*<span className="text-xs text-[var(--text-muted)]">速度:</span>*/}
         {SPEEDS.map((s) => (
           <button
             key={s}

@@ -139,8 +139,8 @@
     {
       "type": "user_message",
       "content": {
-        "zh": "【漏洞利用】构造反序列化 payload 并注入到 execution 参数（需进一步研究）",
-        "en": "[Exploitation] Construct deserialization payload and inject into execution parameter (requires further research)"
+        "zh": "【漏洞利用】构造反序列化 payload 并注入到 `execution` 参数（需进一步研究）",
+        "en": "[Exploitation] Construct deserialization payload and inject into `execution` parameter (requires further research)"
       },
       "annotation": {
         "zh": "该漏洞利用依赖于 Java 反序列化 gadget，如 Commons Collections 等。具体 payload 构造不在本文档范围内，建议参考 ysoserial 工具生成。",
