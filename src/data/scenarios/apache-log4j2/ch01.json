@@ -78,8 +78,8 @@
     {
       "type": "assistant_text",
       "content": {
-        "zh": "协议对比：RMI 使用 jndi:rmi:// 协议，LDAP 使用 `jndi:ldap://` 协议。JDK 版本越高，RMI 和 LDAP 的利用限制越多。在高版本 JDK 中，RMI 需要开启 setProperty 才能利用，而 LDAP 完全被禁止。\n防护建议：升级 JDK 到最新版本，避免使用不安全的 JNDI 查询。",
-        "en": "Protocol comparison: RMI uses jndi:rmi:// protocol, LDAP uses `jndi:ldap://` protocol. Higher JDK versions have more restrictions on RMI and LDAP exploitation. In high version JDK, RMI requires setProperty enabled for exploitation, while LDAP is completely prohibited. \nProtection recommendation: Upgrade JDK to latest version, avoid using insecure JNDI lookups."
+        "zh": "协议对比：RMI 使用 `jndi:rmi://` 协议，LDAP 使用 `jndi:ldap://` 协议。JDK 版本越高，RMI 和 LDAP 的利用限制越多。在高版本 JDK 中，RMI 需要开启 setProperty 才能利用，而 LDAP 完全被禁止。\n防护建议：升级 JDK 到最新版本，避免使用不安全的 JNDI 查询。",
+        "en": "Protocol comparison: RMI uses `jndi:rmi://` protocol, LDAP uses `jndi:ldap://` protocol. Higher JDK versions have more restrictions on RMI and LDAP exploitation. In high version JDK, RMI requires setProperty enabled for exploitation, while LDAP is completely prohibited. \nProtection recommendation: Upgrade JDK to latest version, avoid using insecure JNDI lookups."
       },
       "annotation": {
         "zh": "助手响应",
