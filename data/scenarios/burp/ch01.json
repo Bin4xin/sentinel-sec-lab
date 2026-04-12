@@ -1,0 +1,116 @@
+{
+  "_source_md": "2021-11-23-CAPTCHA-BYPASS-WALKTHROUGH.md",
+  "version": "1.0",
+  "title": {
+    "zh": "BurpSuite验证码识别绕过插件实践",
+    "en": "BurpSuite CAPTCHA Bypass Plugin Walkthrough"
+  },
+  "description": {
+    "zh": "本文档介绍了如何使用开源项目 `NEW_xp_CAPTCHA` 搭建本地验证码识别服务，并在 BurpSuite 中通过自定义 Python 扩展插件实现验证码自动识别与爆破。内容包括服务端部署、Burp 扩展加载、`Intruder` 配置以及实际识别成功率分析。",
+    "en": "This document describes how to set up a local CAPTCHA recognition service using the open-source project `NEW_xp_CAPTCHA` and integrate it with BurpSuite via a custom Python extension to automate CAPTCHA solving during brute-force attacks. It covers server deployment, Burp extension loading, `Intruder` configuration, and an analysis of real-world recognition success rates."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "克隆并启动 `NEW_xp_CAPTCHA` 验证码识别服务",
+        "en": "Clone and Start `NEW_xp_CAPTCHA` Recognition Service"
+      },
+      "annotation": {
+        "zh": "从 GitHub 克隆 `NEW_xp_CAPTCHA` 仓库，安装依赖 `muggle_ocr`，并启动本地识别服务器，默认监听 `0.0.0.0:8899`。",
+        "en": "Clone the `NEW_xp_CAPTCHA` repository from GitHub, install the `muggle_ocr` dependency, and start the local recognition server listening on `0.0.0.0:8899` by default."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "服务端部署命令",
+            "en": "Server Deployment Commands"
+          },
+          "code": "$ git clone https://github.com/smxiazi/NEW_xp_CAPTCHA.git\n$ cd NEW_xp_CAPTCHA\n$ python3 -m pip install muggle_ocr\n$ python3 server.py\nStarting server, listen at: 0.0.0.0:8899",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "BurpSuite 加载 Python 扩展 `xp_CAPTCHA.py`",
+        "en": "Load Python Extension `xp_CAPTCHA.py` in BurpSuite"
+      },
+      "annotation": {
+        "zh": "在 BurpSuite 的 `Extender` → `Extensions` 中添加类型为 `Python` 的扩展，选择 `xp_CAPTCHA.py` 文件。需提前安装 Jython `2.7.1` 或更高版本的 Jar 包。",
+        "en": "Add a `Python`-type extension in BurpSuite's `Extender` → `Extensions` tab, selecting the `xp_CAPTCHA.py` file. Ensure Jython `2.7.1` or higher Jar is installed beforehand."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "Jython 下载地址",
+            "en": "Jython Download URL"
+          },
+          "code": "https://www.jython.org/download.html",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![BurpSuite扩展与Intruder配置界面](https://image.isisy.com/images/2022/02/20/7MsrhjizV1kCc59.png)",
+      "toolName": "Burp_Extension_Intruder_Config_Screenshot"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "配置 `Intruder` 攻击参数与验证码 Payload 生成器",
+        "en": "Configure `Intruder` Attack Parameters and CAPTCHA Payload Generator"
+      },
+      "annotation": {
+        "zh": "在 `Intruder` 模块中设置攻击类型，并为验证码参数选择 `Payload Type` 为 `Extension-generated`，指定生成器为 `xp_CAPTCHA`。同时在请求头中添加 `xiapao` 字段，其值为验证码图片的生成 URL。注意：爆破时需设置单线程（`Number of threads = 1`）。",
+        "en": "In `Intruder` module, set the attack type, and for the CAPTCHA parameter choose `Payload Type` as `Extension-generated` and select `xp_CAPTCHA` as the generator. Additionally, add the `xiapao` header with the URL that generates the CAPTCHA image. Note: Set `Number of threads = 1` during the attack."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "需添加的请求头示例",
+            "en": "Example Header to Add"
+          },
+          "code": "xiapao: http://url/index.php?s=/Admin/Public/verify.html",
+          "language": "http"
+        },
+        {
+          "caption": {
+            "zh": "Intruder Payload 配置要点",
+            "en": "Intruder Payload Configuration Points"
+          },
+          "code": "Payload Set for CAPTCHA parameter:\n- Payload Type: Extension-generated\n- Select Generator: xp_CAPTCHA\n- Number of threads: 1",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "开始爆破并观察识别成功率",
+        "en": "Start Attack and Observe Recognition Success Rate"
+      },
+      "annotation": {
+        "zh": "以单线程模式启动攻击。实际渗透测试中发现，若验证码包含混淆字符，识别成功率极低，仅为约 `0.01%`（`18/1795`）。",
+        "en": "Start the attack with a single thread. In real-world penetration tests, the recognition success rate is extremely low (approx `0.01%` or `18/1795`) when the CAPTCHA includes obfuscated characters."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "成功率计算公式",
+            "en": "Success Rate Calculation"
+          },
+          "code": "P_{(success)}=\\frac{18}{1795} * 100\\% = 0.01\\%",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![爆破结果与成功率展示](https://image.isisy.com/images/2022/02/20/Hc421C6ijGvNZkF.png)",
+      "toolName": "Intruder_Attack_Result_Screenshot"
+    }
+  ]
+}

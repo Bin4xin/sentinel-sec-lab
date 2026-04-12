@@ -1,0 +1,49 @@
+{
+  "_source_md": "wechat-miniapps/2026-01-26-wechat-miniapp-reverse-advanced-toolchain-2026.md",
+  "version": "wechat-miniapp-advanced-toolchain",
+  "title": {
+    "zh": "微信小程序逆向 III - KillWxapkg 自动化工具链",
+    "en": "WeChat MiniApp Reverse III - KillWxapkg Automated Toolchain"
+  },
+  "description": {
+    "zh": "介绍 2026 年主流自动化逆向工具链，重点推荐 KillWxapkg 工具的完整使用流程。",
+    "en": "Introduce mainstream 2026 automated reverse engineering toolchains, focusing on KillWxapkg tool usage."
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": { "zh": "主流工具对比：KillWxapkg 支持自动化扫描、解密、解包，内置通用 Hook。", "en": "Mainstream tools comparison: KillWxapkg supports automated scanning, decryption, unpacking, built-in universal Hook." },
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "安装 KillWxapkg 工具", "en": "Install KillWxapkg tool" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "git clone https://github.com/Ackites/KillWxapkg\npip install -r requirements.txt\npython main.py",
+          "caption": { "zh": "克隆并安装 KillWxapkg", "en": "Clone and install KillWxapkg" }
+        }
+      ],
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "常用命令：scan 扫描、unpack 解包、hook 提取密钥。", "en": "Common commands: scan, unpack, hook to extract keys." },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "python main.py scan\npython main.py unpack --name \"目标小程序\"\npython main.py hook --name \"目标小程序\"",
+          "caption": { "zh": "KillWxapkg 常用命令", "en": "KillWxapkg common commands" }
+        }
+      ],
+      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "Hook 日志输出加密密钥和明文，完成自动化分析。", "en": "Hook logs output encryption keys and plaintext, completing automated analysis." },
+      "toolName": "killwxapkg",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    }
+  ]
+}

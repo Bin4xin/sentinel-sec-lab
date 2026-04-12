@@ -1,0 +1,35 @@
+1:"$Sreact.fragment"
+3:I[47747,["/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js"],"ThemeProvider"]
+4:I[47747,["/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js"],"LocaleProvider"]
+5:I[39756,["/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js"],"default"]
+6:I[37457,["/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js"],"default"]
+7:I[78517,["/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js","/sentinel-sec-lab/_next/static/chunks/1r5hx63gutomm.js"],"NotFound"]
+:HL["/sentinel-sec-lab/_next/static/chunks/3r_cx4mlt81zz.css","style"]
+2:T49c,
+              (function() {
+                // Get stored preferences
+                var themeMode = localStorage.getItem('theme-mode');
+                var colorScheme = localStorage.getItem('color-scheme');
+                var systemFollow = localStorage.getItem('system-follow') === 'true';
+                
+                // Determine theme mode
+                var isDark;
+                if (systemFollow) {
+                  isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                } else {
+                  isDark = themeMode === 'dark' || (!themeMode && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                }
+                
+                // Apply dark class
+                if (isDark) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+                
+                // Apply color scheme
+                if (colorScheme === 'highlight') {
+                  document.documentElement.setAttribute('data-color-scheme', 'highlight');
+                }
+              })();
+            0:{"buildId":"QgWOgMLqlKHMTX0TASXZ1","data":[{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/sentinel-sec-lab/_next/static/chunks/3r_cx4mlt81zz.css","precedence":"next"}],["$","script","script-0",{"src":"/sentinel-sec-lab/_next/static/chunks/1g9h98dumouub.js","async":true}],["$","script","script-1",{"src":"/sentinel-sec-lab/_next/static/chunks/42dr8j1-kteuv.js","async":true}]],["$","html",null,{"lang":"zh","suppressHydrationWarning":true,"children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$2"}}]}],["$","body",null,{"className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable antialiased","children":["$","$L3",null,{"children":["$","$L4",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","template":["$","$L6",null,{}],"notFound":[["$","div",null,{"className":"flex min-h-screen items-center justify-center bg-[var(--background)]","children":["$","$L7",null,{}]}],[]]}]}]}]}]]}]]}],"isPartial":false,"staleTime":300,"varyParams":null}]}

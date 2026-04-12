@@ -1,0 +1,49 @@
+{
+  "_source_md": "tools/2021-06-04-Red-team-penetration-agent-pool-based-on-scylla.md",
+  "version": "scylla-proxy-pool",
+  "title": {
+    "zh": "基于 Scylla 的红队渗透代理池",
+    "en": "Red Team Penetration Proxy Pool Based on Scylla"
+  },
+  "description": {
+    "zh": "使用 Scylla 搭建代理池，支持手工 Burp 渗透同时后台 Xray 扫描。",
+    "en": "Use Scylla to build proxy pool, supporting manual Burp penetration while Xray scans in background."
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": { "zh": "Scylla 代理池环境搭建", "en": "Scylla proxy pool environment setup" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "cd scylla-1.1.7\npython3 -m pip install -r requirements.txt\nexport http_proxy=\"http://127.0.0.1:8082\"\nexport https_proxy=\"http://127.0.0.1:8082\"\npython3 -m scylla",
+          "caption": { "zh": "安装依赖并启动 Scylla", "en": "Install dependencies and start Scylla" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "Scylla 启动成功，监听端口 8899", "en": "Scylla started successfully, listening on port 8899" },
+      "toolName": "scylla",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "验证代理池是否正常工作", "en": "Verify proxy pool is working" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "curl http://api.ipify.org\ncurl http://api.ipify.org -x http://127.0.0.1:8081",
+          "caption": { "zh": "对比真实 IP 和代理 IP", "en": "Compare real IP and proxy IP" }
+        }
+      ],
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "代理池搭建完成，可用于 Burp 渗透和 Xray 扫描的 IP 轮换。", "en": "Proxy pool setup complete, can be used for Burp penetration and Xray scanning IP rotation." },
+      "annotation": { "zh": "助手总结", "en": "Assistant summary" }
+    }
+  ]
+}
