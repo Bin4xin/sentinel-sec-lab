@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { SimStep } from "@/types/agent-data";
@@ -8,10 +8,9 @@ import { getLocalizedText } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-context";
 import { User, Bot, Terminal, ArrowRight, AlertCircle, Copy, Check } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown from "react-markdown";
-// 如果未安装 remark-gfm，请删除下一行导入及下方 remarkPlugins 配置
 import remarkGfm from "remark-gfm";
+import { oneLight, oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 interface SimulatorMessageProps {
   step: SimStep;
@@ -49,8 +48,8 @@ const TYPE_CONFIG: Record<
   system_event: {
     icon: AlertCircle,
     label: "System",
-    bgClass: "bg-purple-500/10",
-    borderClass: "border-purple-500/30",
+    bgClass: "bg-purple-950/30",
+    borderClass: "border-purple-800",
   },
 };
 
@@ -82,9 +81,9 @@ function getContainerClassName(type: string): string {
   switch (type) {
     case "tool_call":
     case "tool_result":
-      return "font-mono text-xs";
+      return "overflow-x-auto whitespace-pre-wrap rounded bg-zinc-950 p-2.5 font-mono text-xs leading-relaxed text-zinc-100";
     case "system_event":
-      return "text-purple-300";
+      return "overflow-x-auto whitespace-pre-wrap rounded bg-purple-950 p-2.5 font-mono text-xs leading-relaxed text-purple-100";
     default:
       return "text-sm";
   }
@@ -94,7 +93,35 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
   const { locale } = useLocale();
   const config = TYPE_CONFIG[step.type] || TYPE_CONFIG.assistant_text;
   const Icon = config.icon;
-  const highlightStyle = vs;
+
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const isDarkMode =
+          document.documentElement.classList.contains("dark") ||
+          (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDark(isDarkMode);
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(() => {
+      checkTheme();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleMediaChange = () => checkTheme();
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener("change", handleMediaChange);
+    };
+  }, []);
+
+  const highlightStyle = isDark ? oneDark : oneLight;
 
   const contentText = step.content ? getLocalizedText(step.content, locale) : "";
 
@@ -120,12 +147,11 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
         {step.content && (
             <div
                 className={cn(
-                    "leading-relaxed text-[var(--foreground)]",
+                    "leading-relaxed font-medium text-[var(--foreground)]",
                     getContainerClassName(step.type)
                 )}
             >
               <ReactMarkdown
-                  // 如果未安装 remark-gfm，请删除下面这行
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => (
@@ -136,7 +162,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                     code: ({ children, className }) => {
                       const isInline = !className?.includes("language-");
                       return isInline ? (
-                          <code className="rounded bg-[var(--accent)] px-1 py-0.5 font-mono text-[0.85em]">
+                          <code className="rounded bg-[var(--accent)] px-1 py-0.5 font-mono text-[0.85em] text-[var(--sidebar-bg)]">
                             {children}
                           </code>
                       ) : (
@@ -144,7 +170,6 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                       );
                     },
                     pre: ({ children }) => {
-                      // 类型安全：确保 children 是有效的 React 元素
                       if (!React.isValidElement(children)) {
                         return <pre>{children}</pre>;
                       }
@@ -160,7 +185,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
 
                       return (
                           <div className="group relative my-2 overflow-hidden rounded-md border border-[var(--card-border)]">
-                            <div className="flex items-center justify-between bg-[var(--card-bg)] px-3 py-1">
+                            <div className="flex items-center justify-between px-3 py-1">
                       <span className="font-mono text-[10px] text-[var(--text-muted)]">
                         {language}
                       </span>
@@ -177,7 +202,7 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                                     fontSize: "0.75rem",
                                     lineHeight: "1.5",
                                     borderRadius: 0,
-                                    background: "var(--code-bg)",
+                                    background: "var(--card-border)",
                                   }}
                                   lineNumberStyle={{
                                     minWidth: "2.5em",
@@ -239,9 +264,9 @@ export function SimulatorMessage({ step }: SimulatorMessageProps) {
                           customStyle={{
                             margin: 0,
                             fontSize: "0.75rem",
-                            lineHeight: "1.5",
+                            lineHeight: "1.0",
                             borderRadius: 0,
-                            background: "var(--code-bg)",
+                            background: "var(--pre-bggroud)",
                           }}
                           lineNumberStyle={{
                             minWidth: "2.5em",
