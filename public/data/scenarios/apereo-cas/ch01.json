@@ -1,25 +1,166 @@
 {
   "_source_md": "Apereo-CAS/2022-06-06-Apereo-CAS-LessThan-4-2-x-RCE.md",
-  "version": "Apereo-CAS-LessThan-4-2-x-RCE",
+  "version": "apereo-cas-rce",
   "title": {
-    "zh": "Apereo CAS < 4.2.x 反序列化远程代码执行",
-    "en": "Apereo CAS < 4.2.x 反序列化远程代码执行"
+    "zh": "Apereo CAS < 4.2.x 反序列化远程代码执行漏洞复现",
+    "en": "Apereo CAS < 4.2.x Deserialization Remote Code Execution Walkthrough"
   },
   "description": {
-    "zh": "「Apereo CAS」",
-    "en": "「Apereo CAS」"
+    "zh": "详细介绍 Apereo CAS 低于 4.2.x 版本的反序列化远程代码执行漏洞的复现过程，包括靶场搭建、资产发现、版本识别及漏洞入口点分析。",
+    "en": "Detailed walkthrough of deserialization RCE vulnerability in Apereo CAS versions below 4.2.x, including lab setup, asset discovery, version identification, and vulnerability entry point analysis."
   },
   "steps": [
     {
-      "type": "assistant_text",
+      "type": "user_message",
       "content": {
-        "zh": "### CAS靶场搭建\n\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\nCAS::Maven仓库地址</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.1.6\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.1.6</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.2.7\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.2.7</a>\n</div>\n---\n\n分别进入下载Pom或者War，不想麻烦直接下载WAR包放到tomcat web文件夹就行。\n\n### 如何发现CAS资产\n\n- `Apereo Central Authentication Service`版本\n\n通过路由404报错查看版本：`https://cas.example.com/cas/iwana404;)`\n\n- 在CAS访问404资源时跳转302，本地不管是否配置`HTTPS证书`都不会返回404页面，所以排除了HTTPS证书的可能性；\n\n- [Tomcat SSL Cert](https://www.jianshu.com/p/a55590f486a2){:target=\"_blank\"}\n\n![2022-06-06-16.14.28.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-16.14.28.png)\n\n或者页脚处本身也会体现版本：\n\n![2022-06-06-17.10.40.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-17.10.40.png)\n\n- 登录`Post`请求包个性参数\n\n```\nPOST http://localhost:8000/login;jsessionid=1653784B0F427BE086AD4EC81386726D HTTP/1.1\nHost: localhost:8000\n\nusername=admin&password=123&execution=\n```\n\n如上面所示的`execution`参数（也是反序列化的入口）",
-        "en": "### CAS靶场搭建\n\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\nCAS::Maven仓库地址</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.1.6\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.1.6</a>\n</div>\n---\n<div class=\"content\">\n<a href=\"https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.2.7\" class=\"btn-primary btn color-border-accent-emphasis\" target=\"blank\">\ncas-server-webapp::4.2.7</a>\n</div>\n---\n\n分别进入下载Pom或者War，不想麻烦直接下载WAR包放到tomcat web文件夹就行。\n\n### 如何发现CAS资产\n\n- `Apereo Central Authentication Service`版本\n\n通过路由404报错查看版本：`https://cas.example.com/cas/iwana404;)`\n\n- 在CAS访问404资源时跳转302，本地不管是否配置`HTTPS证书`都不会返回404页面，所以排除了HTTPS证书的可能性；\n\n- [Tomcat SSL Cert](https://www.jianshu.com/p/a55590f486a2){:target=\"_blank\"}\n\n![2022-06-06-16.14.28.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-16.14.28.png)\n\n或者页脚处本身也会体现版本：\n\n![2022-06-06-17.10.40.png]({{site.PicturesLinks_Domain}}/images/2022/06/06/2022-06-06-17.10.40.png)\n\n- 登录`Post`请求包个性参数\n\n```\nPOST http://localhost:8000/login;jsessionid=1653784B0F427BE086AD4EC81386726D HTTP/1.1\nHost: localhost:8000\n\nusername=admin&password=123&execution=\n```\n\n如上面所示的`execution`参数（也是反序列化的入口）"
+        "zh": "【环境搭建】下载 CAS 4.1.6 或 4.2.7 版本的 WAR 包",
+        "en": "[Lab Setup] Download CAS 4.1.6 or 4.2.7 WAR package"
       },
       "annotation": {
-        "zh": "文档内容",
-        "en": "Document content"
-      }
+        "zh": "从 Maven 仓库获取 cas-server-webapp 的 WAR 文件，用于部署到 Tomcat",
+        "en": "Obtain cas-server-webapp WAR file from Maven repository for deployment to Tomcat"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "下载 CAS 4.1.6 WAR 包（Maven 仓库地址）",
+            "en": "Download CAS 4.1.6 WAR package (Maven repository URL)"
+          },
+          "code": "https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.1.6",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "下载 CAS 4.2.7 WAR 包（Maven 仓库地址）",
+            "en": "Download CAS 4.2.7 WAR package (Maven repository URL)"
+          },
+          "code": "https://mvnrepository.com/artifact/org.jasig.cas/cas-server-webapp/4.2.7",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【环境搭建】部署 WAR 包到 Tomcat webapps 目录",
+        "en": "[Lab Setup] Deploy WAR package to Tomcat webapps directory"
+      },
+      "annotation": {
+        "zh": "将下载的 WAR 文件直接放入 Tomcat 的 webapps 文件夹，启动 Tomcat 后自动解压部署",
+        "en": "Place the downloaded WAR file directly into Tomcat's webapps folder; it will be auto-deployed upon Tomcat startup"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "示例：将 cas.war 复制到 Tomcat webapps 目录",
+            "en": "Example: copy cas.war to Tomcat webapps directory"
+          },
+          "code": "$ cp cas-server-webapp-4.1.6.war $TOMCAT_HOME/webapps/cas.war\n$ $TOMCAT_HOME/bin/startup.sh",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【资产发现】通过访问不存在的资源（404 路由）获取 CAS 版本信息",
+        "en": "[Asset Discovery] Obtain CAS version information by accessing a non-existent resource (404 route)"
+      },
+      "annotation": {
+        "zh": "访问 /cas/iwana404 等随机路径，CAS 返回的 302 跳转或错误页面中可能泄漏版本号",
+        "en": "Access a random path like /cas/iwana404; the 302 redirect or error page may leak the version number"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "示例请求（触发版本泄露）",
+            "en": "Example request (triggers version disclosure)"
+          },
+          "code": "https://cas.example.com/cas/iwana404",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "预期响应中的版本信息（示例）",
+            "en": "Expected version information in response (example)"
+          },
+          "code": "Apereo Central Authentication Service 4.1.6",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【资产发现】检查 CAS 页面页脚处的版本标识",
+        "en": "[Asset Discovery] Check the footer of CAS page for version indicator"
+      },
+      "annotation": {
+        "zh": "CAS 登录页面底部通常直接显示版本号，例如 \"Apereo CAS 4.1.6\"",
+        "en": "The footer of the CAS login page usually displays the version number directly, e.g., \"Apereo CAS 4.1.6\""
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "页脚版本示例",
+            "en": "Example footer version text"
+          },
+          "code": "Powered by Apereo CAS 4.2.7",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![2026-03-26-12.15.03.png](https://image.isisy.com/images/2022/06/06/2022-06-06-16.14.28.png)",
+      "toolName": "ApereoCAS BannerDemoPicture1"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【漏洞入口点】分析登录 POST 请求中的 `execution` 参数",
+        "en": "[Vulnerability Entry Point] Analyze the `execution` parameter in login POST request"
+      },
+      "annotation": {
+        "zh": "CAS 登录表单中包含 `execution` 参数，该参数值会被反序列化处理，是漏洞触发点",
+        "en": "The CAS login form contains an `execution` parameter, whose value is deserialized and becomes the vulnerability trigger point"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "一个典型的 CAS 登录 POST 请求（含 execution 参数）",
+            "en": "A typical CAS login POST request (with execution parameter)"
+          },
+          "code": "POST http://localhost:8000/login;jsessionid=1653784B0F427BE086AD4EC81386726D HTTP/1.1\nHost: localhost:8000\n\nusername=admin&password=123&execution=",
+          "language": "http"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【漏洞利用】构造反序列化 payload 并注入到 `execution` 参数（需进一步研究）",
+        "en": "[Exploitation] Construct deserialization payload and inject into `execution` parameter (requires further research)"
+      },
+      "annotation": {
+        "zh": "该漏洞利用依赖于 Java 反序列化 gadget，如 Commons Collections 等。具体 payload 构造不在本文档范围内，建议参考 ysoserial 工具生成。",
+        "en": "Exploitation relies on Java deserialization gadgets such as Commons Collections. Specific payload construction is beyond this document; refer to ysoserial tool for generation."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "使用 ysoserial 生成 CommonsCollections6  payload 示例",
+            "en": "Example of generating CommonsCollections6 payload using ysoserial"
+          },
+          "code": "$ java -jar ysoserial.jar CommonsCollections6 \"calc.exe\" | base64",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![2022-06-06-17.10.40.png](https://image.isisy.com/images/2022/06/06/2022-06-06-17.10.40.png)",
+      "toolName": "ApereoCAS BannerDemoPicture2"
     }
   ]
 }
