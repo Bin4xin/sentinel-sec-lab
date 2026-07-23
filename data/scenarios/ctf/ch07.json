@@ -1,0 +1,175 @@
+{
+  "_source_md": "CTF/2021-07-29-CTF-Misc-WalkThrough.md",
+  "version": "ctf-misc-walkthrough",
+  "title": {
+    "zh": "CTF杂项题目详解",
+    "en": "CTF Misc Challenges Walkthrough"
+  },
+  "description": {
+    "zh": "CTF杂项方向题目的详细解题指南，包括文件隐写、图片隐写、音频隐写、流量分析、取证分析等。",
+    "en": "Detailed guide for CTF misc challenges, covering file steganography, image steganography, audio steganography, traffic analysis, forensics."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "分析CTF杂项题目的常见类型和解题技巧",
+        "en": "Analyze common types and solving techniques of CTF misc challenges"
+      },
+      "annotation": {
+        "zh": "用户请求杂项题目分析",
+        "en": "User requests misc challenge analysis"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "杂项题目范围广泛，包括文件隐写、流量分析、取证分析等。需要掌握各类文件格式和常用工具，如 binwalk、StegSolve、Audacity、Wireshark 等。",
+        "en": "Misc challenges cover wide range including file steganography, traffic analysis, forensics. Need to master various file formats and tools like binwalk, StegSolve, Audacity, Wireshark."
+      },
+      "annotation": {
+        "zh": "助手介绍杂项题型",
+        "en": "Assistant introduces misc challenge types"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "使用 binwalk 分析 Word 文档，发现实际为 ZIP 压缩包",
+        "en": "Use binwalk to analyze Word document, discover it's actually a ZIP archive"
+      },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "binwalk word.docx\n\nDECIMAL       HEXADECIMAL     DESCRIPTION\n--------------------------------------------------------------------------------\n0             0x0             Zip archive data...\n8139          0x1FCB          Zip archive data, name: word/media/image1.jpg",
+          "caption": {
+            "zh": "发现 docx 实际为 zip 格式",
+            "en": "Discover docx is actually zip format"
+          }
+        },
+        {
+          "language": "bash",
+          "code": "mv word.docx word.zip && unzip word.zip",
+          "caption": {
+            "zh": "解压后获得隐藏图片及 flag",
+            "en": "Extract to get hidden image and flag"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "文件格式识别与隐写示例",
+        "en": "File format identification and steganography example"
+      }
+    },
+    {
+      "type": "tool_result",
+      "content": {
+        "zh": "解压后发现 image1.jpg 包含 flag",
+        "en": "After extraction, image1.jpg contains the flag"
+      },
+      "toolName": "binwalk",
+      "annotation": {
+        "zh": "binwalk 提取隐藏文件",
+        "en": "Binwalk extract hidden files"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "图片隐写常见技术：LSB 隐写、EXIF 信息、盲水印。遇到两张相似的图片优先考虑盲水印。",
+        "en": "Common image steganography: LSB, EXIF, blind watermark. Consider blind watermark when seeing two similar images."
+      },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "python bwm.py decode 1.png 2.png result.png",
+          "caption": {
+            "zh": "使用 BlindWaterMark 工具提取盲水印",
+            "en": "Use BlindWaterMark tool to extract blind watermark"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "盲水印隐写示例",
+        "en": "Blind watermark steganography example"
+      }
+    },
+    {
+      "type": "system_event",
+      "content": {
+        "zh": "分析 SQL 注入流量包，通过二分法盲注特征提取 flag",
+        "en": "Analyze SQL injection traffic packet, extract flag via binary blind injection characteristics"
+      },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "GET /ctf/Less-5/?id=1' and ascii(substr((select flag from t),1,1))=102--\nGET /ctf/Less-5/?id=1' and ascii(substr((select flag from t),2,1))=108--\n...",
+          "caption": {
+            "zh": "流量中的盲注 payload 示例",
+            "en": "Example of blind injection payload in traffic"
+          }
+        },
+        {
+          "language": "python",
+          "code": "# 提取 ASCII 码并转换为字符\nascii_codes = [102,108,97,103,123,119,49,114,101,115,104,65,82,75,95,101,122,95,49,115,110,116,105,116,125]\nflag = ''.join(chr(c) for c in ascii_codes)\nprint(flag)  # flag{w1reshARK_ez_1snt}",
+          "caption": {
+            "zh": "ASCII 码转 flag",
+            "en": "Convert ASCII codes to flag"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "SQL 注入流量分析示例",
+        "en": "SQL injection traffic analysis example"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "取证分析：从流量中导出 webshell 加密通信，逆向解密脚本后获取备份压缩包密码，最终得到 AES 加密的 flag。",
+        "en": "Forensics: Export encrypted webshell communication from traffic, reverse the decryption script to get backup archive password, finally obtain AES-encrypted flag."
+      },
+      "codeBlocks": [
+        {
+          "language": "php",
+          "code": "function E($D,$K){ for($i=0;$i<strlen($D);$i++) { $D[$i] = $D[$i]^$K[$i+1&15]; } return $D; }",
+          "caption": {
+            "zh": "木马中的异或加密函数",
+            "en": "XOR encryption function in trojan"
+          }
+        },
+        {
+          "language": "bash",
+          "code": "# 从流量中提取 env 命令结果，得到 APACHE_RUN_USER=www-data\nunzip -P www-data www.zip",
+          "caption": {
+            "zh": "使用获取的密码解压备份文件",
+            "en": "Unzip backup file with obtained password"
+          }
+        },
+        {
+          "language": "php",
+          "code": "$enc = 'aes-128-ecb';\n$flag = 'CN1Sq9tFItxZhsu3zCWbrdf6ozOL4eoKG0s71vGg/AKKnch3IL3jzwtXeCgWK5QP';",
+          "caption": {
+            "zh": "flag.php 中的 AES 密文",
+            "en": "AES ciphertext in flag.php"
+          }
+        }
+      ],
+      "annotation": {
+        "zh": "取证分析示例（webshell 解密与 AES 解密）",
+        "en": "Forensics example (webshell decryption and AES decryption)"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "杂项题目需要广泛的知识储备和工具使用经验。常用工具：binwalk、foremost、StegSolve、Audacity、Wireshark、BlindWaterMark、CyberChef 等。",
+        "en": "Misc challenges require broad knowledge and tool usage experience. Common tools: binwalk, foremost, StegSolve, Audacity, Wireshark, BlindWaterMark, CyberChef, etc."
+      },
+      "annotation": {
+        "zh": "助手总结与工具推荐",
+        "en": "Assistant summary and tool recommendation"
+      }
+    }
+  ]
+}

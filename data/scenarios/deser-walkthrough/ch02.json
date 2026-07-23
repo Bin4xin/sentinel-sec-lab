@@ -1,0 +1,57 @@
+{
+  "_source_md": "Deser-Walkthrough/2020-05-18-ShiroDeser.md",
+  "version": "shiro-deserialization",
+  "title": {
+    "zh": "Shiro反序列化漏洞分析",
+    "en": "Shiro Deserialization Vulnerability Analysis"
+  },
+  "description": {
+    "zh": "Apache Shiro框架反序列化漏洞原理分析，包括框架简介、利用Gadget生成Cookie、最终GetShell。",
+    "en": "Apache Shiro framework deserialization vulnerability analysis, including framework intro, Gadget cookie generation, final GetShell."
+  },
+  "steps": [
+    {
+      "type": "assistant_text",
+      "content": { "zh": "Apache Shiro是一个开源安全框架，提供身份验证、授权、密码学和会话管理。", "en": "Apache Shiro is an open source security framework providing authentication, authorization, cryptography and session management." },
+      "annotation": { "zh": "介绍Shiro框架", "en": "Introduce Shiro framework" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "Shiro三个核心组件：Subject（当前用户）、SecurityManager（安全管理器）、Realm（数据源连接器）。", "en": "Shiro three core components: Subject, SecurityManager, Realm." },
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "Shiro使用场景：J2EE应用权限控制，相比Spring Security更简单轻量。", "en": "Shiro usage scenarios: J2EE application permission control, simpler and lighter than Spring Security." },
+      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "分析Shiro反序列化漏洞原理", "en": "Analyze Shiro deserialization vulnerability principle" },
+      "annotation": { "zh": "用户询问", "en": "User asks" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "反序列化分析：利用Gadget生成恶意Cookie，通过rememberMe字段传递。", "en": "Deserialization analysis: Use Gadget to generate malicious Cookie, pass via rememberMe field." },
+      "codeBlocks": [
+        {
+          "language": "java",
+          "code": "// Shiro rememberMe Cookie构造\nObjectInputStream ois = new ObjectInputStream(decryptBase64(cookie));\nObject obj = ois.readObject(); // 触发反序列化",
+          "caption": { "zh": "Shiro rememberMe反序列化入口", "en": "Shiro rememberMe deserialization entry" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "利用YSOSerial生成Payload，通过Shiro的rememberMe Cookie触发RCE。", "en": "Use YSOSerial to generate Payload, trigger RCE via Shiro rememberMe Cookie." },
+      "toolName": "ysoserial",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "最终目标：通过反序列化漏洞获取服务器Shell权限。", "en": "Final goal: Obtain server shell access via deserialization vulnerability." },
+      "annotation": { "zh": "助手总结", "en": "Assistant summary" }
+    }
+  ]
+}

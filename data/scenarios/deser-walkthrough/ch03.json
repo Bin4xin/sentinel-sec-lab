@@ -1,0 +1,66 @@
+{
+  "_source_md": "Deser-Walkthrough/2020-06-07-javaDeser.md",
+  "version": "java-deserialization-basics",
+  "title": {
+    "zh": "Java反序列化基础",
+    "en": "Java Deserialization Basics"
+  },
+  "description": {
+    "zh": "Java序列化和反序列化的基本概念，通过简单实验理解对象与字节流的转换过程。",
+    "en": "Basic concepts of Java serialization and deserialization, understanding object and byte stream conversion through simple experiments."
+  },
+  "steps": [
+    {
+      "type": "assistant_text",
+      "content": { "zh": "序列化将对象转化为字节流，便于保存；反序列化将字节流还原为对象。", "en": "Serialization converts objects to byte streams for storage; deserialization converts byte streams back to objects." },
+      "annotation": { "zh": "介绍序列化概念", "en": "Introduce serialization concept" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "定义People类实现Serializable接口：", "en": "Define People class implementing Serializable interface:" },
+      "codeBlocks": [
+        {
+          "language": "java",
+          "code": "import java.io.Serializable;\n\npublic class People implements Serializable {\n    public String name;\n    public int age;\n    public String getName() { return name; }\n    public void setName(String name) { this.name = name; }\n    public int getAge() { return age; }\n    public void setAge(int age) { this.age = age; }\n}",
+          "caption": { "zh": "可序列化的People类", "en": "Serializable People class" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "执行序列化操作", "en": "Execute serialization operation" },
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "tool_result",
+      "content": { "zh": "序列化数据写入People.txt，使用xxd查看二进制内容", "en": "Serialized data written to People.txt, view binary content with xxd" },
+      "codeBlocks": [
+        {
+          "language": "bash",
+          "code": "file People.txt\nPeople.txt: Java serialization data, version 5\n\nxxd People.txt\n00000000: aced 0005 7372 0006 5065 6f70 6c65 4499  ....sr..PeopleD.",
+          "caption": { "zh": "查看序列化文件格式", "en": "View serialized file format" }
+        }
+      ],
+      "toolName": "bash",
+      "annotation": { "zh": "工具输出", "en": "Tool output" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "反序列化攻击原理：重写readObject方法执行恶意代码", "en": "Deserialization attack principle: Override readObject method to execute malicious code" },
+      "codeBlocks": [
+        {
+          "language": "java",
+          "code": "private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {\n    in.defaultReadObject();\n    Runtime.getRuntime().exec(\"calc.exe\");\n}",
+          "caption": { "zh": "恶意readObject方法", "en": "Malicious readObject method" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "反序列化RCE的POC传入参数可控，通过构造恶意序列化数据触发代码执行。", "en": "Deserialization RCE POC requires controllable parameters, trigger code execution via malicious serialized data." },
+      "annotation": { "zh": "助手总结", "en": "Assistant summary" }
+    }
+  ]
+}

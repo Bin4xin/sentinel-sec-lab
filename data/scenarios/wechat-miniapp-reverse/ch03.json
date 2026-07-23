@@ -1,0 +1,53 @@
+{
+  "_source_md": "wechat-miniapps/2026-01-26-wechat-miniapp-reverse-expert-vm-bypass-2026.md",
+  "version": "wechat-miniapp-expert-vm-bypass",
+  "title": {
+    "zh": "微信小程序逆向 IV - 字节码虚拟机与内存转储",
+    "en": "WeChat MiniApp Reverse IV - Bytecode VM and Memory Dump"
+  },
+  "description": {
+    "zh": "当小程序采用字节码保护、多层包装壳后，需转向内存级动态逆向分析。",
+    "en": "When MiniApps use bytecode protection and multi-layer wrappers, need to switch to memory-level dynamic reverse analysis."
+  },
+  "steps": [
+    {
+      "type": "system_event",
+      "content": { "zh": "主流防护现状：V8/QuickJS字节码保护、多层包装壳与自校验、行为与环境指纹检测。", "en": "Current protection status: V8/QuickJS bytecode protection, multi-layer wrappers, behavior fingerprint detection." },
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "核心原则：无论多少层加密，业务明文最终都会在内存中完成组装。", "en": "Core principle: No matter how many layers of encryption, business plaintext will eventually be assembled in memory." },
+      "annotation": { "zh": "助手响应", "en": "Assistant response" }
+    },
+    {
+      "type": "system_event",
+      "content": { "zh": "推荐技术栈：", "en": "Recommended tech stack:" },
+      "codeBlocks": [
+        {
+          "language": "javascript",
+          "code": "// Frida Memory.scan 搜索内存明文\nvar pattern = Memory.scanSync(\n  Process.getModuleByName(\"libwechat.so\"),\n  '13812345678',\n  { json: true }\n);\nconsole.log(\"找到特征地址: \" + pattern[0].address);",
+          "caption": { "zh": "基于特征值搜索内存明文", "en": "Search memory plaintext by signature" }
+        }
+      ],
+      "annotation": { "zh": "系统事件", "en": "System event" }
+    },
+    {
+      "type": "user_message",
+      "content": { "zh": "Hook网络请求发送入口", "en": "Hook network request entry point" },
+      "codeBlocks": [
+        {
+          "language": "javascript",
+          "code": "Interceptor.attach(Module.findExportByName(null, \"send\"), {\n  onEnter: function(args) {\n    console.log(\"待发送数据缓冲区:\", args[1].readByteArray(512));\n  }\n});",
+          "caption": { "zh": "拦截send函数获取请求数据", "en": "Intercept send function to get request data" }
+        }
+      ],
+      "annotation": { "zh": "用户操作", "en": "User action" }
+    },
+    {
+      "type": "assistant_text",
+      "content": { "zh": "实战案例：绕过某支付小程序字节码保护。使用Memory.scan搜索业务特征值，提取完整明文JSON。", "en": "Case study: Bypass bytecode protection of payment MiniApp. Use Memory.scan to search business signatures, extract complete plaintext JSON." },
+      "annotation": { "zh": "助手讲解", "en": "Assistant explains" }
+    }
+  ]
+}

