@@ -46,8 +46,8 @@ const STORAGE_KEYS = {
 // ============================================
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
-  const [colorScheme, setColorSchemeState] = useState<ColorScheme>("default");
-  const [systemFollow, setSystemFollowState] = useState(false);
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>("highlight");
+  const [systemFollow, setSystemFollowState] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   // Initialize from localStorage and system preference
@@ -64,8 +64,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setColorSchemeState(storedColorScheme);
     }
 
-    // Set system follow
-    const shouldFollowSystem = storedSystemFollow === "true";
+    // Set system follow (default to true for first-time visitors)
+    const shouldFollowSystem = storedSystemFollow === null ? true : storedSystemFollow === "true";
     setSystemFollowState(shouldFollowSystem);
 
     // Set theme mode
